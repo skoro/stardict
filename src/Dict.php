@@ -13,7 +13,7 @@ namespace skoro\stardict;
  *
  * @author skoro
  */
-class Dict
+class Dict implements Informative
 {
 
     /**
@@ -148,7 +148,7 @@ class Dict
      * Lookup word data in dictionary.
      *
      * @param string $word
-     * @see Index::lookup()
+     * @see Index::lookup()    
      * @return array|false
      * @throws DictException
      */

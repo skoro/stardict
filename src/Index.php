@@ -13,7 +13,7 @@ namespace skoro\stardict;
  *
  * @author skoro
  */
-class Index implements \IteratorAggregate
+class Index implements \IteratorAggregate, Informative
 {
 
     /**
