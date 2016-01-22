@@ -1,0 +1,175 @@
+#!/usr/bin/env php
+<?php
+
+require_once dirname(__FILE__) . '/../vendor/autoload.php';
+
+use skoro\stardict\Info;
+use skoro\stardict\Index;
+use skoro\stardict\Dict;
+
+$script_name = array_shift($argv);
+
+if (in_array('--help', $argv)) {
+    echo <<<EOF
+
+Convert StarDict dictionary to SQL insert queries.
+
+Usage:   {$script_name} OPTIONS 
+Example: {$script_name} ru-en.ifo
+
+Available options are:
+    
+    --help              This help.
+    --create-schema     Create initial tables schema, by default schema not created.
+    --table-dict        Dictionary table name, by default "dict".
+    --table-word        Words table name, by default "word".
+    --table-dict-words  Table name for links between dict and words, by default "dict_words".
+    --use-dsn           Use defined DSN for executing queries instead to output to stdout.
+    --username          Database user name.
+    --password          Database user password.
+
+
+EOF;
+    exit;
+}
+
+/**
+ * Converter application.
+ */
+class Converter
+{
+
+    /**
+     * @var array table names.
+     */
+    public static $tables = [
+        'dict' => 'dict',
+        'word' => 'word',
+        'dict_words' => 'dict_words',
+    ];
+    
+    /**
+     * @var bool generate schema creation.
+     */
+    public static $createSchema = false;
+    
+    /**
+     * @var Info
+     */
+    protected $info;
+    
+    /**
+     * @var Index
+     */
+    protected $index;
+    
+    /**
+     * @var Dict
+     */
+    protected $dict;
+    
+    /**
+     * @param string $file
+     */
+    public function __construct($file)
+    {
+        $this->info = new Info($file);
+        $this->index = new Index($this->info);
+        $this->dict = new Dict($this->index);
+    }
+
+    /**
+     * @return string
+     */
+    public function schema()
+    {
+        $tables = self::$tables;
+        return <<<EOF
+CREATE TABLE {$tables['dict']} (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    dict VARCHAR(255) NOT NULL,
+    PRIMARY KEY(`id`)
+);
+CREATE TABLE {$tables['word']} (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    word VARCHAR(255) NOT NULL,
+    PRIMARY KEY(`id`)
+);
+CREATE TABLE {$tables['dict_words']} (
+    dict_id INT UNSIGNED NOT NULL,
+    word_id INT UNSIGNED NOT NULL,
+    UNIQUE `idx_dict_words` (`dict_id`, `word_id`)
+);
+EOF;
+    }
+    
+    /**
+     * StarDict conversion.
+     */
+    public function run()
+    {
+        return $this->schema();
+    }
+
+}
+
+/**
+ * Abort application execution.
+ * @param string $message
+ */
+function abort($message) {
+    global $script_name;
+    echo $script_name . ': Error: ' . $message . PHP_EOL;
+    exit(1);
+}
+
+/**
+ * Get option parameter.
+ * @param string $name option name.
+ * @return string
+ */
+function get_cmd_param($name) {
+    global $argv;
+    if (!($option = array_shift($argv))) {
+        abort(sprintf('option "%s" requires a value.', $name));
+    }
+    return $option;
+}
+
+while ($option = array_shift($argv)) {
+    if (strpos($option, '=') !== false) {
+        list($option, $value) = explode('=', $option, 2);
+        array_unshift($argv, $value);
+    }
+    switch ($option) {
+        case '--create-schema':
+            Converter::$createSchema = true;
+            break;
+            
+        case '--table-dict':
+            Converter::$tables['dict'] = get_cmd_param('--table-dict');
+            break;
+            
+        case '--table-word':
+            Converter::$tables['word'] = get_cmd_param('--table-word');
+            break;
+            
+        case '--table-dict-words':
+            Converter::$tables['dict_words'] = get_cmd_param('--table-dict-words');
+            break;
+        
+        default:
+            if (strpos($option, '--') === 0) {
+                abort('unrecognized option "' . $option . '"');
+            }
+            $file = $option;
+            break;
+    }
+}
+
+if (!isset($file)) {
+    abort('StarDict .ifo file name required.');
+}
+
+echo (new Converter($file))->run();
+
