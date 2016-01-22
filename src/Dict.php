@@ -69,7 +69,7 @@ class Dict implements Informative
         }
         
         if (!$this->handle) {
-            throw new DictException('Couldn\'t open file: ' . $this->filename);
+            throw new DictException($this, 'Couldn\'t open file.');
         }
     }
     
@@ -138,7 +138,7 @@ class Dict implements Informative
         }
         
         if ($seek === -1) {
-            throw new DictException('File seek error.');
+            throw new DictException($this, 'File seek error.');
         }
         
         return $data;

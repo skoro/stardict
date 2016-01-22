@@ -15,7 +15,7 @@ namespace skoro\stardict;
  *
  * @author skoro
  */
-class Info
+class Info implements Informative
 {
 
     const HEADER = "StarDict's dict ifo file";
@@ -61,7 +61,7 @@ class Info
     public function __get($name)
     {
         if (!isset($this->options[$name])) {
-            throw new InfoException('Info option "' . $name . '" not defined.');
+            throw new InfoException($this, 'Info option "' . $name . '" not defined.');
         }
         return $this->options[$name]['val'];
     }
@@ -74,6 +74,14 @@ class Info
     public function getFilename()
     {
         return $this->filename;
+    }
+    
+    /**
+     * Informative::getInfo()
+     */
+    public function getInfo()
+    {
+        return $this;
     }
     
     /**
@@ -102,7 +110,7 @@ class Info
     public function getIdxFilename()
     {
         if (!($idx = $this->getFilenameFor('.idx'))) {
-            throw new InfoException('No .idx index file found.');
+            throw new InfoException($this, 'No .idx index file found.');
         }
         return $idx;
     }
@@ -116,7 +124,7 @@ class Info
     public function getDictFilename()
     {
         if (!($dict = $this->getFilenameFor('.dict'))) {
-            throw new InfoException('No .dict dictionary file found.');
+            throw new InfoException($this, 'No .dict dictionary file found.');
         }
         return $dict;
     }
@@ -139,8 +147,8 @@ class Info
      */
     protected function readFile()
     {
-        if (!($data = file_get_contents($this->filename))) {
-            throw new InfoException('Couldn\'t read file: ' . $this->filename);
+        if (!($data = @file_get_contents($this->filename))) {
+            throw new InfoException($this, 'Couldn\'t read file.');
         }
         
         $lines = explode("\n", $data);
@@ -166,7 +174,7 @@ class Info
                 }
                 $this->options[$k]['val'] = $v;
             } else {
-                throw new InfoException('Unknown info option: ' . $k);
+                throw new InfoException($this, 'Unknown info option: ' . $k);
             }
         }
         
@@ -183,7 +191,7 @@ class Info
     protected function validateHeader($header)
     {
         if ($header !== self::HEADER) {
-            throw new InfoException('StarDict .ifo has invalid format header.');
+            throw new InfoException($this, 'StarDict .ifo has invalid format header.');
         }
     }
     
@@ -198,7 +206,7 @@ class Info
             return $opt['req'] && empty($opt['val']);
         });
         if ($missed) {
-            throw new InfoException('Options "' . implode(',', array_keys($missed)) . '" are required.');
+            throw new InfoException($this, 'Options "' . implode(',', array_keys($missed)) . '" are required.');
         }
     }
     
@@ -210,7 +218,7 @@ class Info
     protected function validateVersion()
     {
         if ($this->options['version']['val'] !== '2.4.2') {
-            throw new InfoException('Only 2.4.2 version is supported.');
+            throw new InfoException($this, 'Only 2.4.2 version is supported.');
         }
     }
     

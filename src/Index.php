@@ -107,10 +107,10 @@ class Index implements \IteratorAggregate, Informative
         }
         
         if (!$data) {
-            throw new IndexException('Read data error.');
+            throw new IndexException($this, 'Read data error.');
         }
         if ($fsize != $this->info->idxfilesize) {
-            throw new IndexException('Index file size mismatch.');
+            throw new IndexException($this, 'Index file size mismatch.');
         }
         
         $pos = 0;
@@ -134,7 +134,7 @@ class Index implements \IteratorAggregate, Informative
         }
         
         if ($wordcount !== $this->info->wordcount) {
-            throw new IndexException(sprintf('Readed words does not match %d != %d', $wordcount, $this->info->wordcount));
+            throw new IndexException($this, sprintf('Readed words does not match %d != %d', $wordcount, $this->info->wordcount));
         }
     }
 

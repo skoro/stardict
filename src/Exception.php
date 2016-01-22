@@ -14,5 +14,28 @@ namespace skoro\stardict;
 class Exception extends \Exception
 {
 
+    /**
+     * @var Informative
+     */
+    protected $info;
+
+    /**
+     * @param Informative $info
+     * @param string $message
+     */
+    public function __construct(Informative $info, $message)
+    {
+        $this->info = $info;
+        parent::__construct($message);
+    }
+    
+    /**
+     * @return Informative
+     */
+    public function getInfo()
+    {
+        return $this->info;
+    }
+
 }
 
