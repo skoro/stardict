@@ -6,6 +6,7 @@ require_once dirname(__FILE__) . '/../vendor/autoload.php';
 use skoro\stardict\Info;
 use skoro\stardict\Index;
 use skoro\stardict\Dict;
+use skoro\stardict\PDOConverter;
 
 $script_name = array_shift($argv);
 
@@ -14,103 +15,31 @@ if (in_array('--help', $argv)) {
 
 Convert StarDict dictionary to SQL insert queries.
 
-Usage:   {$script_name} OPTIONS 
-Example: {$script_name} ru-en.ifo
+Usage:   {$script_name} [OPTIONS] dsn .ifo
+
+Example:
+
+1. Import dictionary to SQLite database:
+
+    {$script_name} sqlite:/var/db/ru-en.sq3 ru-en.ifo
+    
+2. Import dictionary to MySQL database:
+
+    {$script_name} --user dbuser --password dbpass mysql:host=localhost;dbname=dicts ru-en.ifo
 
 Available options are:
     
     --help              This help.
-    --create-schema     Create initial tables schema, by default schema not created.
+    --init-schema       Create initial tables schema, by default schema not created.
     --table-dict        Dictionary table name, by default "dict".
     --table-word        Words table name, by default "word".
     --table-dict-words  Table name for links between dict and words, by default "dict_words".
-    --use-dsn           Use defined DSN for executing queries instead to output to stdout.
     --username          Database user name.
     --password          Database user password.
 
 
 EOF;
     exit;
-}
-
-/**
- * Converter application.
- */
-class Converter
-{
-
-    /**
-     * @var array table names.
-     */
-    public static $tables = [
-        'dict' => 'dict',
-        'word' => 'word',
-        'dict_words' => 'dict_words',
-    ];
-    
-    /**
-     * @var bool generate schema creation.
-     */
-    public static $createSchema = false;
-    
-    /**
-     * @var Info
-     */
-    protected $info;
-    
-    /**
-     * @var Index
-     */
-    protected $index;
-    
-    /**
-     * @var Dict
-     */
-    protected $dict;
-    
-    /**
-     * @param string $file
-     */
-    public function __construct($file)
-    {
-        $this->info = new Info($file);
-        $this->index = new Index($this->info);
-        $this->dict = new Dict($this->index);
-    }
-
-    /**
-     * @return string
-     */
-    public function schema()
-    {
-        $tables = self::$tables;
-        return <<<EOF
-CREATE TABLE {$tables['dict']} (
-    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    dict VARCHAR(255) NOT NULL,
-    PRIMARY KEY(`id`)
-);
-CREATE TABLE {$tables['word']} (
-    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    word VARCHAR(255) NOT NULL,
-    PRIMARY KEY(`id`)
-);
-CREATE TABLE {$tables['dict_words']} (
-    dict_id INT UNSIGNED NOT NULL,
-    word_id INT UNSIGNED NOT NULL,
-    UNIQUE `idx_dict_words` (`dict_id`, `word_id`)
-);
-EOF;
-    }
-    
-    /**
-     * StarDict conversion.
-     */
-    public function run()
-    {
-        return $this->schema();
-    }
-
 }
 
 /**
@@ -136,40 +65,62 @@ function get_cmd_param($name) {
     return $option;
 }
 
+$file = ''; // Input .ifo file.
+$dsn = '';
+$user = null;
+$password = null;
+$convParams = [];
+$opts = [];
+
 while ($option = array_shift($argv)) {
     if (strpos($option, '=') !== false) {
         list($option, $value) = explode('=', $option, 2);
         array_unshift($argv, $value);
     }
     switch ($option) {
-        case '--create-schema':
-            Converter::$createSchema = true;
+        case '--init-schema':
+            $convParams['initSchema'] = true;
             break;
             
         case '--table-dict':
-            Converter::$tables['dict'] = get_cmd_param('--table-dict');
+            $convParams['tableDict'] = get_cmd_param('--table-dict');
             break;
             
         case '--table-word':
-            Converter::$tables['word'] = get_cmd_param('--table-word');
+            $convParams['tableWord'] = get_cmd_param('--table-word');
             break;
             
         case '--table-dict-words':
-            Converter::$tables['dict_words'] = get_cmd_param('--table-dict-words');
+            $convParams['tableDictWords'] = get_cmd_param('--table-dict-words');
+            break;
+            
+        case '--username':
+            $user = get_cmd_param('--username');
+            break;
+        
+        case '--password':
+            $password = get_cmd_param('--password');
             break;
         
         default:
             if (strpos($option, '--') === 0) {
                 abort('unrecognized option "' . $option . '"');
             }
-            $file = $option;
+            $opts[] = $option;
             break;
     }
 }
 
-if (!isset($file)) {
+@list($dsn, $file, ) = $opts;
+
+if (empty($dsn)) {
+    abort('DSN required.');
+}
+if (empty($file)) {
     abort('StarDict .ifo file name required.');
 }
 
-echo (new Converter($file))->run();
+(new PDOConverter($file))
+    ->setPDO(new \PDO($dsn, $user, $password))
+    ->convert($convParams);
 
