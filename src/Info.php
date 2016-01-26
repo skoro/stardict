@@ -67,6 +67,16 @@ class Info implements Informative
     }
     
     /**
+     * @throws \LogicException
+     */
+    public function __set($name, $value)
+    {
+        if (isset($this->options[$name])) {
+            throw new \LogicException('Cannot set read only property: "' . $name . '"');
+        }
+    }
+    
+    /**
      * Get info file name.
      *
      * @return string
