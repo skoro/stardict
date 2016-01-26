@@ -70,12 +70,18 @@ class Converter
     public function convert(array $params = [])
     {
         $this->params = array_merge($this->params, $params);
-        $this->init();
-        foreach ($this->index as $word => $index) {
-            $data = $this->dict->getData($index[0], $index[1]);
-            $this->process($word, $data);
+        try {
+            $this->init();
+            foreach ($this->index as $word => $index) {
+                $data = $this->dict->getData($index[0], $index[1]);
+                $this->process($word, $data);
+            }
+            $this->done();
         }
-        $this->done();
+        catch (\Exception $e) {
+            $this->catchException($e);
+            throw $e;
+        }
     }
     
     /**
@@ -87,6 +93,16 @@ class Converter
     public function process($word, $data)
     {
         print $word . ',"' . addslashes($data) .  '"' . PHP_EOL;
+    }
+    
+    /**
+     * Finish conversion on exception.
+     *
+     * @param \Exception $e
+     */
+    protected function catchException(\Exception $e)
+    {
+        // Does nothing.    
     }
     
 }

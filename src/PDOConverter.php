@@ -219,5 +219,16 @@ EOF;
         }
     }
     
+    /**
+     * @inheritdoc
+     * Rollback transaction on any exception.
+     */
+    protected function catchException(\Exception $e)
+    {
+        if ($this->getPDO()->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+    }
+    
 }
 
