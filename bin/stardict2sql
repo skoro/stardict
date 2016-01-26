@@ -3,6 +3,8 @@
 
 require_once dirname(__FILE__) . '/../vendor/autoload.php';
 
+error_reporting(E_ALL);
+
 use skoro\stardict\Info;
 use skoro\stardict\Index;
 use skoro\stardict\Dict;
@@ -19,23 +21,25 @@ Usage:   {$script_name} [OPTIONS] dsn .ifo
 
 Example:
 
-1. Import dictionary to SQLite database:
+1. Import dictionary to SQLite database file "/tmp/stardict.sq3":
 
-    {$script_name} sqlite:/var/db/ru-en.sq3 ru-en.ifo
+    {$script_name} --init-schema sqlite:/tmp/stardict.sq3 ru-en.ifo
     
-2. Import dictionary to MySQL database:
+2. Import dictionary to MySQL database "stardict":
 
-    {$script_name} --user dbuser --password dbpass mysql:host=localhost;dbname=dicts ru-en.ifo
+    {$script_name} --init-schema --username dbuser --password dbpass \
+                            mysql:host=localhost;dbname=stardict ru-en.ifo
 
 Available options are:
     
     --help              This help.
     --init-schema       Create initial tables schema, by default schema not created.
-    --table-dict        Dictionary table name, by default "dict".
-    --table-word        Words table name, by default "word".
+    --table-dicts       Dictionary table name, by default "dicts".
+    --table-words       Words table name, by default "words".
     --table-dict-words  Table name for links between dict and words, by default "dict_words".
     --username          Database user name.
     --password          Database user password.
+    --no-transaction    Disable transaction.
 
 
 EOF;
@@ -73,7 +77,7 @@ $convParams = [];
 $opts = [];
 
 while ($option = array_shift($argv)) {
-    if (strpos($option, '=') !== false) {
+    if (strpos($option, '--') === 0 && strpos($option, '=') !== false) {
         list($option, $value) = explode('=', $option, 2);
         array_unshift($argv, $value);
     }
@@ -83,11 +87,11 @@ while ($option = array_shift($argv)) {
             break;
             
         case '--table-dict':
-            $convParams['tableDict'] = get_cmd_param('--table-dict');
+            $convParams['tableDicts'] = get_cmd_param('--table-dicts');
             break;
             
         case '--table-word':
-            $convParams['tableWord'] = get_cmd_param('--table-word');
+            $convParams['tableWords'] = get_cmd_param('--table-words');
             break;
             
         case '--table-dict-words':
@@ -100,6 +104,10 @@ while ($option = array_shift($argv)) {
         
         case '--password':
             $password = get_cmd_param('--password');
+            break;
+        
+        case '--no-transaction':
+            $convParams['transaction'] = false;
             break;
         
         default:
@@ -121,6 +129,6 @@ if (empty($file)) {
 }
 
 (new PDOConverter($file))
-    ->setPDO(new \PDO($dsn, $user, $password))
+    ->setPDO(new PDO($dsn, $user, $password))
     ->convert($convParams);
 
