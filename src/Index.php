@@ -64,6 +64,14 @@ class Index implements \IteratorAggregate, Informative
     }
     
     /**
+     * @return integer
+     */
+    public function getWordCount()
+    {
+        return count($this->words);
+    }
+    
+    /**
      * Lookup a word.
      *
      * @param string $word exact word or wild card.
@@ -114,7 +122,6 @@ class Index implements \IteratorAggregate, Informative
         }
         
         $pos = 0;
-        $wordcount = 0;
         
         while ($pos < $fsize) {
             $chars = [];
@@ -130,12 +137,8 @@ class Index implements \IteratorAggregate, Informative
             $x = unpack("@{$pos}/Noffset/Nsize", $data);
             $this->words[$word] = [$x['offset'], $x['size']];
             $pos += 8;
-            $wordcount++;
         }
         
-        if ($wordcount !== $this->info->wordcount) {
-            throw new IndexException($this, sprintf('Readed words does not match %d != %d', $wordcount, $this->info->wordcount));
-        }
     }
 
 }
