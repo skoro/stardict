@@ -28,7 +28,7 @@ Example:
 2. Import dictionary to MySQL database "stardict":
 
     {$script_name} --init-schema --username dbuser --password dbpass \
-                            mysql:host=localhost;dbname=stardict ru-en.ifo
+                            "mysql:host=localhost;dbname=stardict" ru-en.ifo
 
 Available options are:
     
