@@ -5,9 +5,6 @@ require_once dirname(__FILE__) . '/../vendor/autoload.php';
 
 error_reporting(E_ALL);
 
-use skoro\stardict\Info;
-use skoro\stardict\Index;
-use skoro\stardict\Dict;
 use skoro\stardict\PDOConverter;
 use skoro\stardict\Console;
 
