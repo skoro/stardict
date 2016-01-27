@@ -130,23 +130,27 @@ class PDOConverter extends Converter
         }
     
         $sql = <<<EOF
-CREATE TABLE IF NOT EXISTS {$this->params['tableDicts']} (
+DROP TABLE IF EXISTS {$this->params['tableDicts']};
+CREATE TABLE {$this->params['tableDicts']} (
     id {$pk},
     dict VARCHAR(255) NOT NULL,
     author VARCHAR(255) NOT NULL DEFAULT '',
     website VARCHAR(255) NOT NULL DEFAULT '',
     desc TEXT DEFAULT ''
 );
-CREATE TABLE IF NOT EXISTS {$this->params['tableWords']} (
+DROP TABLE IF EXISTS {$this->params['tableWords']};
+CREATE TABLE {$this->params['tableWords']} (
     id {$pk},
     word VARCHAR(255) NOT NULL UNIQUE
 );
-CREATE TABLE IF NOT EXISTS {$this->params['tableDictWords']} (
+DROP TABLE IF EXISTS {$this->params['tableDictWords']};
+CREATE TABLE {$this->params['tableDictWords']} (
     dict_id INT UNSIGNED NOT NULL,
     word_id INT UNSIGNED NOT NULL,
     data TEXT
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_dict_words ON {$this->params['tableDictWords']}(dict_id, word_id);
+DROP INDEX IF EXISTS idx_dict_words;
+CREATE UNIQUE INDEX idx_dict_words ON {$this->params['tableDictWords']}(dict_id, word_id);
 EOF;
         if ($this->getPDO()->exec($sql) === false) {
             throw $this->PDOException();
