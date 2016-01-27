@@ -9,10 +9,12 @@ use skoro\stardict\Info;
 use skoro\stardict\Index;
 use skoro\stardict\Dict;
 use skoro\stardict\PDOConverter;
+use skoro\stardict\Console;
 
-$script_name = array_shift($argv);
+$console = Console::getInstance();
+$script_name = $console->getScriptName();
 
-if (in_array('--help', $argv)) {
+if ($console->checkArg('--help')) {
     echo <<<EOF
 
 Convert StarDict dictionary to SQL insert queries.
@@ -46,29 +48,6 @@ EOF;
     exit;
 }
 
-/**
- * Abort application execution.
- * @param string $message
- */
-function abort($message) {
-    global $script_name;
-    echo $script_name . ': Error: ' . $message . PHP_EOL;
-    exit(1);
-}
-
-/**
- * Get option parameter.
- * @param string $name option name.
- * @return string
- */
-function get_cmd_param($name) {
-    global $argv;
-    if (!($option = array_shift($argv))) {
-        abort(sprintf('option "%s" requires a value.', $name));
-    }
-    return $option;
-}
-
 $file = ''; // Input .ifo file.
 $dsn = '';
 $user = null;
@@ -76,34 +55,30 @@ $password = null;
 $convParams = [];
 $opts = [];
 
-while ($option = array_shift($argv)) {
-    if (strpos($option, '--') === 0 && strpos($option, '=') !== false) {
-        list($option, $value) = explode('=', $option, 2);
-        array_unshift($argv, $value);
-    }
+while ($option = $console->getCommandArg()) {
     switch ($option) {
         case '--init-schema':
             $convParams['initSchema'] = true;
             break;
             
-        case '--table-dict':
-            $convParams['tableDicts'] = get_cmd_param('--table-dicts');
+        case '--table-dicts':
+            $convParams['tableDicts'] = $console->getOptionParam('--table-dicts');
             break;
             
-        case '--table-word':
-            $convParams['tableWords'] = get_cmd_param('--table-words');
+        case '--table-words':
+            $convParams['tableWords'] = $console->getOptionParam('--table-words');
             break;
             
         case '--table-dict-words':
-            $convParams['tableDictWords'] = get_cmd_param('--table-dict-words');
+            $convParams['tableDictWords'] = $console->getOptionParam('--table-dict-words');
             break;
             
         case '--username':
-            $user = get_cmd_param('--username');
+            $user = $console->getOptionParam('--username');
             break;
         
         case '--password':
-            $password = get_cmd_param('--password');
+            $password = $console->getOptionParam('--password');
             break;
         
         case '--no-transaction':
@@ -112,7 +87,7 @@ while ($option = array_shift($argv)) {
         
         default:
             if (strpos($option, '--') === 0) {
-                abort('unrecognized option "' . $option . '"');
+                $console->abort('unrecognized option "' . $option . '"');
             }
             $opts[] = $option;
             break;
@@ -122,13 +97,17 @@ while ($option = array_shift($argv)) {
 @list($dsn, $file, ) = $opts;
 
 if (empty($dsn)) {
-    abort('DSN required.');
+    $console->abort('DSN required.');
 }
 if (empty($file)) {
-    abort('StarDict .ifo file name required.');
+    $console->abort('StarDict .ifo file name required.');
 }
 
-(new PDOConverter($file))
-    ->setPDO(new PDO($dsn, $user, $password))
-    ->convert($convParams);
+try {
+    (new PDOConverter($file))
+        ->setPDO(new PDO($dsn, $user, $password))
+        ->convert($convParams);
+} catch (Exception $e) {
+    $console->abort($e->getMessage());
+}
 
