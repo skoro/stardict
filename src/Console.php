@@ -29,6 +29,11 @@ class Console
      */
     protected $argv;
     
+    /**
+     * Constructor.
+     *
+     * @throws \LogicException when instance already created.
+     */
     public function __construct()
     {
         if (static::$instance) {
@@ -39,6 +44,11 @@ class Console
         $this->argv = $argv;
     }
     
+    /**
+     * Get console instance.
+     *
+     * @return Console
+     */
     public static function getInstance()
     {
         if (static::$instance === null) {
@@ -47,6 +57,11 @@ class Console
         return static::$instance;
     }
 
+    /**
+     * Bail out.
+     *
+     * @param string $message
+     */
     public function abort($message = null)
     {
         if ($message) {
@@ -55,6 +70,12 @@ class Console
         exit(1);
     }
 
+    /**
+     * Get option parameter.
+     *
+     * @param string $name
+     * @return string
+     */
     public function getOptionParam($name)
     {
         if (!($param = array_shift($this->argv))) {
@@ -63,6 +84,11 @@ class Console
         return $param;
     }
     
+    /**
+     * Get next command line argument.
+     *
+     * @return string|null
+     */
     public function getCommandArg()
     {
         $arg = array_shift($this->argv);
@@ -73,11 +99,19 @@ class Console
         return $arg;
     }
     
+    /**
+     * Is exists argument in command line arguments ?
+     *
+     * @return boolean
+     */
     public function checkArg($arg)
     {
         return in_array($arg, $this->argv);
     }
-    
+
+    /**
+     * @return string
+     */    
     public function getScriptName()
     {
         return $this->script;
