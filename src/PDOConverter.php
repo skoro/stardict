@@ -162,7 +162,11 @@ EOF;
     {
         $sql = "INSERT INTO {$this->params['tableDicts']} (dict, author, website, desc) VALUES (:dict, :author, :website, :desc)";
         
-        $sth = $this->getPDO()->prepare($sql)->execute([
+        if (($sth = $this->getPDO()->prepare($sql)) === false) {
+            throw $this->PDOException();
+        }
+        
+        $sth->execute([
             ':dict' => $this->info->bookname,
             ':author' => $this->info->author,
             ':website' => $this->info->website,
@@ -178,14 +182,19 @@ EOF;
     
     public function prepareStatements()
     {
-        $sql = "SELECT id FROM {$this->params['tableWords']} WHERE word = :word";
-        $this->stmtCheckWord = $this->pdo->prepare($sql);
-    
-        $sql = "INSERT INTO {$this->params['tableWords']} (word) VALUES (:word)";
-        $this->stmtAddWord = $this->pdo->prepare($sql);
+        $statements = [
+            'stmtCheckWord' => "SELECT id FROM {$this->params['tableWords']} WHERE word = :word",
+            'stmtAddWord' => "INSERT INTO {$this->params['tableWords']} (word) VALUES (:word)",
+            'stmtDictWords' => "INSERT INTO {$this->params['tableDictWords']} (dict_id, word_id, data) VALUES (:dict_id, :word_id, :data)",
+        ];
         
-        $sql = "INSERT INTO {$this->params['tableDictWords']} (dict_id, word_id, data) VALUES (:dict_id, :word_id, :data)";
-        $this->stmtDictWords = $this->pdo->prepare($sql);
+        foreach ($statements as $var => $sql) {
+            $stmt = $this->pdo->prepare($sql);
+            if ($stmt === false) {
+                throw $this->PDOException();
+            }
+            $this->$var = $stmt;
+        }
     }
     
     /**
