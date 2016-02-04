@@ -15,6 +15,9 @@ $script = $console->getScriptName();
 $dicts = [];
 $words = [];
 
+/**
+ * Show usage information.
+ */
 function usage() {
     global $script;
 ?>
@@ -46,6 +49,20 @@ Available options are:
     exit;
 }
 
+/**
+ * @param string $filename
+ * @return Dict
+ */
+function openDict($filename) {
+    global $console;
+    try {
+        $dict = new Dict(new Index(new Info($filename)));
+    } catch (\skoro\stardict\Exception $e) {
+        $console->abort(sprintf('%s: %s', $e->getInfo()->getFileName(), $e->getMessage()));
+    }
+    return $dict;
+}
+
 if ($console->checkArg('--help')) {
     usage();
 }
@@ -53,8 +70,7 @@ if ($console->checkArg('--help')) {
 while ($option = $console->getCommandArg()) {
     switch ($option) {
         case '--dict':
-            $info = new Info($console->getOptionParam('--dict'));
-            $dicts[] = new Dict(new Index($info));
+            $dicts[] = openDict($console->getOptionParam($option));
             break;
 
         case '--words':
@@ -70,6 +86,16 @@ while ($option = $console->getCommandArg()) {
 }
 
 if (empty($words)) {
-    usage();
+    $console->abort('one or more words required.');
 }
+
+if (empty($dicts)) {
+    foreach (glob('*.ifo') as $filename) {
+        $dicts[] = openDict($filename);
+    }
+    if (empty($dicts)) {
+        $console->abort('no dictionary found.');
+    }
+}
+
 
