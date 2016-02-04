@@ -65,7 +65,7 @@ class Console
     public function abort($message = null)
     {
         if ($message) {
-            printf('%s: error: %s\n', $this->script, $message);
+            printf("%s: error: %s\n", $this->script, $message);
         }
         exit(1);
     }
