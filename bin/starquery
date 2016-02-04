@@ -12,30 +12,64 @@ use skoro\stardict\Console;
 
 $console = Console::getInstance();
 $script = $console->getScriptName();
+$dicts = [];
+$words = [];
 
-if ($console->checkArg('--help')) {
-    echo <<<EOF
-    
+function usage() {
+    global $script;
+?>
 StarDict query tool.
 
-Usage:  {$script} [OPTIONS] word [word ...]
+Usage:  <?= $script ?> [OPTIONS] word [word ...]
 
 Example:
 
-1. Query word "blablabla" in dictionary "stardict":
+1. Query data for word "blablabla" in dictionary "stardict":
 
-    {$script} --dict stardict blablabla
+    <?= $script ?> --dict stardict blablabla
 
-2. Query words "foo" and "blablabla" in dictionaries "one", "two", "three":
+2. Query data for words "foo" and "blablabla" in dictionaries "one", "two", "three":
     
-    {$script} --dict one --dict two --dict three foo blablabla
+    <?= $script ?> --dict one --dict two --dict three foo blablabla
+    
+3. Query data in all dictionaries in current directory:
+    
+    <?= $script ?> blablabla
 
 Available options are:
 
     --help  This help.
     --dict  Dictionary .ifo file (extension .ifo may be omit).
+    --words Show list of words in dictionary.
 
-
-EOF;
+<?php
     exit;
 }
+
+if ($console->checkArg('--help')) {
+    usage();
+}
+
+while ($option = $console->getCommandArg()) {
+    switch ($option) {
+        case '--dict':
+            $info = new Info($console->getOptionParam('--dict'));
+            $dicts[] = new Dict(new Index($info));
+            break;
+
+        case '--words':
+            break;
+            
+        default:
+            if (strpos($option, '--') === 0) {
+                $console->abort('unrecognized option "' . $option . '"');
+            }
+            $words[] = $option;
+            break;
+    }
+}
+
+if (empty($words)) {
+    usage();
+}
+
