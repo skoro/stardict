@@ -10,10 +10,14 @@ use skoro\stardict\Index;
 use skoro\stardict\Dict;
 use skoro\stardict\Console;
 
+const OUTPUT_DATA = 1;
+const OUTPUT_WORDS = 2;
+
 $console = Console::getInstance();
 $script = $console->getScriptName();
 $dicts = [];
 $words = [];
+$output = OUTPUT_DATA;
 
 /**
  * Show usage information.
@@ -63,10 +67,16 @@ function openDict($filename) {
     return $dict;
 }
 
+function dictName($dict) {
+    return $dict->getInfo()->bookname . PHP_EOL .
+        '====================' . PHP_EOL;
+}
+
 if ($console->checkArg('--help')) {
     usage();
 }
 
+// Parse command line arguments.
 while ($option = $console->getCommandArg()) {
     switch ($option) {
         case '--dict':
@@ -74,6 +84,7 @@ while ($option = $console->getCommandArg()) {
             break;
 
         case '--words':
+            $output = OUTPUT_WORDS;
             break;
             
         default:
@@ -85,10 +96,11 @@ while ($option = $console->getCommandArg()) {
     }
 }
 
-if (empty($words)) {
+if ($output === OUTPUT_DATA && empty($words)) {
     $console->abort('one or more words required.');
 }
 
+// Load dictionaries from current directory.
 if (empty($dicts)) {
     foreach (glob('*.ifo') as $filename) {
         $dicts[] = openDict($filename);
@@ -98,4 +110,28 @@ if (empty($dicts)) {
     }
 }
 
+foreach ($dicts as $dict) {
+    switch ($output) {
+        // Query words
+        case OUTPUT_DATA:
+            foreach ($words as $word) {
+                if ($data = $dict->lookup($word)) {
+                    echo dictName($dict);
+                    foreach ($data as $word => $chunk) {
+                        echo '>>>  ' . $word . '  <<<' . PHP_EOL;
+                        echo $chunk . PHP_EOL . PHP_EOL;
+                    }
+                }
+            }
+            break;
+        
+        // All words in dictionary.
+        case OUTPUT_WORDS:
+            echo dictName($dict);
+            foreach ($dict->getIndex() as $word => $data) {
+                echo $word . PHP_EOL;
+            }
+            break;
+    }
+}
 
