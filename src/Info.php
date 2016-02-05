@@ -44,10 +44,13 @@ class Info implements Informative
     /**
      * Construct reader instance.
      *
-     * @param string $filename
+     * @param string $filename (with or without extension .ifo)
      */
     public function __construct($filename)
     {
+        if (substr($filename, -4) !== '.ifo') {
+            $filename .= '.ifo';
+        }
         $this->filename = $filename;
         $this->readFile();
     }
