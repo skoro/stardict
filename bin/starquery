@@ -12,6 +12,7 @@ use skoro\stardict\Console;
 
 const OUTPUT_DATA = 1;
 const OUTPUT_WORDS = 2;
+const OUTPUT_POS = 3;
 
 $console = Console::getInstance();
 $script = $console->getScriptName();
@@ -48,6 +49,8 @@ Available options are:
     --help  This help.
     --dict  Dictionary .ifo file (extension .ifo may be omit).
     --words Show list of words in dictionary.
+    --pos   When option "--words" shows also start word position and words
+            data length (in bytes) in .dict file.
 
 <?php
     exit;
@@ -85,6 +88,10 @@ while ($option = $console->getCommandArg()) {
 
         case '--words':
             $output = OUTPUT_WORDS;
+            break;
+            
+        case '--pos':
+            $output = OUTPUT_POS;
             break;
             
         default:
@@ -127,9 +134,14 @@ foreach ($dicts as $dict) {
         
         // All words in dictionary.
         case OUTPUT_WORDS:
+        case OUTPUT_POS:
             echo dictName($dict);
             foreach ($dict->getIndex() as $word => $data) {
-                echo $word . PHP_EOL;
+                echo $word;
+                if ($output === OUTPUT_POS) {
+                    printf(' %d %d', $data[0], $data[1]);
+                }
+                echo PHP_EOL;
             }
             break;
     }
