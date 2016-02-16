@@ -9,24 +9,21 @@ use skoro\stardict\PDOConverter;
 use skoro\stardict\Console;
 
 $console = Console::getInstance();
-$script_name = $console->getScriptName();
-
-if ($console->checkArg('--help')) {
-    echo <<<EOF
+if ($console->checkArg('--help')): ?>
 
 Convert StarDict dictionary to SQL insert queries.
 
-Usage:   {$script_name} [OPTIONS] dsn .ifo
+Usage:   <?= $console->getScriptName() ?> [OPTIONS] dsn .ifo
 
 Example:
 
 1. Import dictionary to SQLite database file "/tmp/stardict.sq3":
 
-    {$script_name} --init-schema sqlite:/tmp/stardict.sq3 ru-en.ifo
+    <?= $console->getScriptName() ?> --init-schema sqlite:/tmp/stardict.sq3 ru-en.ifo
     
 2. Import dictionary to MySQL database "stardict":
 
-    {$script_name} --init-schema --username dbuser --password dbpass \
+    <?= $console->getScriptName() ?> --init-schema --username dbuser --password dbpass \
                             "mysql:host=localhost;dbname=stardict" ru-en.ifo
 
 Available options are:
@@ -40,10 +37,7 @@ Available options are:
     --password          Database user password.
     --no-transaction    Disable transaction.
 
-
-EOF;
-    exit;
-}
+<?php exit; endif;
 
 $file = ''; // Input .ifo file.
 $dsn = '';
