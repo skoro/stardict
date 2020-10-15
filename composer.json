@@ -20,5 +20,8 @@
 	"bin": [
 		"bin/star2db",
 		"bin/starquery"
-	]
+	],
+    "require-dev": {
+        "phpunit/phpunit": "^9.4"
+    }
 }
