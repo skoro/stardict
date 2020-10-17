@@ -2,7 +2,7 @@
 
 namespace StarDict\Info;
 
-use StarDict\Exception\InvalidDictionarySignatureException;
+use StarDict\Exception\InvalidSignatureException;
 
 class SignatureChecker
 {
@@ -21,7 +21,7 @@ class SignatureChecker
     public function checkAndThrow(string $sig): void
     {
         if (! $this->check($sig)) {
-            throw new InvalidDictionarySignatureException();
+            throw new InvalidSignatureException();
         }
     }
 

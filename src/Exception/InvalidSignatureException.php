@@ -2,7 +2,7 @@
 
 namespace StarDict\Exception;
 
-class InvalidDictionarySignatureException extends Exception
+class InvalidSignatureException extends Exception
 {
-
+    public $message = 'Invalid dictionary signature.';   
 }
