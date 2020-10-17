@@ -32,17 +32,17 @@ class FileDictInfo
         return new DictInfoArrayProvider($lines);
     }
 
-    protected function getFileContents(): string
+    public function getFileContents(): string
     {
         $buf = @file_get_contents($this->filename);
         if ($buf === FALSE) {
             throw new RuntimeException('Cannot read file: ' . $this->filename);
         }
-        return $buf;
+        return trim($buf);
     }
 
     protected function explodeContents(string $contents): array
     {
-        return explode("\n", $contents);
+        return array_filter(explode("\n", $contents));
     }
 }
