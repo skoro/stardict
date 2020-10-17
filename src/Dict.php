@@ -1,169 +1,65 @@
-<?php
-/**
- * @author Skorobogatko Alexei <skorobogatko.oleksii@gmail.com>
- * @copyright 2015
- * @version $Id$
- * @since 1.0.0
- */
+<?php declare(strict_types=1);
 
-namespace skoro\stardict;
+namespace StarDict;
 
-/**
- * Implements dictionary reader.
- *
- * @author skoro
- */
-class Dict implements Informative
+use DateTime;
+
+class Dict
 {
+    private array $data;
 
-    /**
-     * @var resource
-     */
-    protected $handle;
-    
-    /**
-     * @var string
-     */
-    protected $filename;
-    
-    /**
-     * @var bool
-     */
-    protected $isCompressed;
-    
-    /**
-     * @var Index
-     */
-    protected $index;
+    public function __construct(array $data)
+    {
+        $this->data = $data;
+    }
 
-    /**
-     * @param Index $index
-     */
-    public function __construct(Index $index)
+    public function getVersion(): string
     {
-        $this->index = $index;
-        $this->filename = $index->getInfo()->getDictFilename();
-        $this->isCompressed = Info::isCompressedFile($this->filename);
-        $this->open();
+        return (string) $this->data['version'] ?? '';        
     }
-    
-    /**
-     * Destructor.
-     */
-    public function __destruct()
+
+    public function getBookname(): string
     {
-        $this->close();
+        return (string) $this->data['bookname'] ?? '';
     }
-    
-    /**
-     * Open dictionary file.
-     *
-     * @throws DictException
-     */
-    protected function open()
+
+    public function getWordCount(): int
     {
-        if ($this->isCompressed) {
-            $this->handle = gzopen($this->filename, 'r');
-        } else {
-            $this->handle = fopen($this->filename);
-        }
-        
-        if (!$this->handle) {
-            throw new DictException($this, 'Couldn\'t open file.');
-        }
+        return (int) $this->data['wordcount'] ?? 0;
     }
-    
-    /**
-     * Close dictionary file.
-     */
-    protected function close()
+
+    public function getIndexFilesize(): int
     {
-        if (is_resource($this->handle)) {
-            if ($this->isCompressed) {
-                gzclose($this->handle);
-            } else {
-                fclose($this->handle);
-            }
-        }
+        return (int) $this->data['idxfilesize'] ?? 0;
     }
-    
-    /**
-     * Get dictionary file name.
-     *
-     * @return string
-     */
-    public function getFilename()
+
+    public function getAuthor(): string
     {
-        return $this->filename;
+        return (string) $this->data['author'] ?? '';
     }
-    
-    /**
-     * Get dictionary info instance.
-     *
-     * @return Info
-     */
-    public function getInfo()
+
+    public function getEmail(): string
     {
-        return $this->index->getInfo();
+        return (string) $this->data['email'] ?? '';
     }
-    
-    /**
-     * Get dictionary index instance.
-     *
-     * @return Index
-     */
-    public function getIndex()
+
+    public function getWebsite(): string
     {
-        return $this->index;
+        return (string) $this->data['website'] ?? '';
     }
-    
-    /**
-     * Read data from dictionary.
-     *
-     * @param int $offset
-     * @param int $size
-     * @return string
-     * @throws DictException When seek operation to offset failed.
-     */
-    public function getData($offset, $size)
+
+    public function getDescription(): string
     {
-        if ($this->isCompressed) {
-            if (($seek = gzseek($this->handle, $offset)) !== -1) {
-                $data = gzread($this->handle, $size);
-            }
-        } else {
-            if (($seek = fseek($this->handle, $offset)) !== -1) {
-                $data = fread($this->handle, $offset);
-            }
-        }
-        
-        if ($seek === -1) {
-            throw new DictException($this, 'File seek error.');
-        }
-        
-        return $data;
+        return (string) $this->data['description'] ?? '';
     }
-    
-    /**
-     * Lookup word data in dictionary.
-     *
-     * @param string $word
-     * @see Index::lookup()    
-     * @return array|false
-     * @throws DictException
-     */
-    public function lookup($word)
+
+    public function getDate(): DateTime
     {
-        if (!($matched = $this->index->lookup($word))) {
-            return false;
-        }
-        
-        $result = [];
-        foreach ($matched as $match => $info) {
-            $result[$match] = $this->getData($info[0], $info[1]);
-        }
-        
-        return $result;
+        return $this->data['date'];
     }
-    
+
+    public function getSameTypeSequence(): string
+    {
+        return (string) $this->data['sametypesequence'] ?? '';
+    }
 }
