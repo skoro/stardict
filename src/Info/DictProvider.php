@@ -4,7 +4,7 @@ namespace StarDict\Info;
 
 use StarDict\Dict;
 
-interface DictInfoProvider
+interface DictProvider
 {
     public function getDict(): Dict;
 }

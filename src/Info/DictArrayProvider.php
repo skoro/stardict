@@ -5,7 +5,7 @@ namespace StarDict\Info;
 use InvalidArgumentException;
 use StarDict\Dict;
 
-class DictInfoArrayProvider implements DictInfoProvider
+class DictArrayProvider implements DictProvider
 {
     private array $data;
     private string $keyValueSeparator;

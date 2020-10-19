@@ -4,7 +4,7 @@ namespace StarDict\Info;
 
 use RuntimeException;
 
-class FileDictInfo
+class DictInfoFile
 {
     private string $filename;
     private SignatureChecker $signature;
@@ -15,7 +15,7 @@ class FileDictInfo
         $this->signature = $signature;
     }
 
-    public function getProvider(): DictInfoProvider
+    public function getProvider(): DictProvider
     {
         $lines = $this->explodeContents(
             $this->getFileContents($this->filename)
@@ -29,7 +29,7 @@ class FileDictInfo
         $signature = array_shift($lines);
         $this->signature->checkAndThrow($signature);
 
-        return new DictInfoArrayProvider($lines);
+        return new DictArrayProvider($lines);
     }
 
     public function getFileContents(): string

@@ -3,13 +3,13 @@
 namespace StarDict\Tests;
 
 use InvalidArgumentException;
-use StarDict\Info\DictInfoArrayProvider;
+use StarDict\Info\DictArrayProvider;
 
-class DictInfoArrayProviderTest extends TestCase
+class DictArrayProviderTest extends TestCase
 {
     public function testFieldsCase()
     {
-        $provider = new DictInfoArrayProvider([
+        $provider = new DictArrayProvider([
             'Bookname=Test1',
             'authoR=me',
         ]);
@@ -23,12 +23,12 @@ class DictInfoArrayProviderTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Dict data cannot be empty.');
 
-        new DictInfoArrayProvider([]);
+        new DictArrayProvider([]);
     }
 
     public function testSeparator()
     {
-        $provider = new DictInfoArrayProvider([
+        $provider = new DictArrayProvider([
             'bookname: test',
             'author: me',
         ], ':');
