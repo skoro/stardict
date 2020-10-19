@@ -6,5 +6,5 @@ use StarDict\Dict;
 
 interface DictInfoProvider
 {
-    public function createDict(): Dict;
+    public function getDict(): Dict;
 }
