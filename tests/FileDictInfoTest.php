@@ -1,0 +1,81 @@
+<?php declare(strict_types=1);
+
+namespace StarDict\Tests;
+
+use RuntimeException;
+use StarDict\Exception\InvalidSignatureException;
+use StarDict\Info\FileDictInfo;
+use StarDict\Info\SignatureChecker;
+
+class FileDictInfoTest extends TestCase
+{
+    protected function getMockedProvider(string $contents)
+    {
+        $mock = $this->getMockBuilder(FileDictInfo::class)
+                     ->setConstructorArgs(['test.ifo', new SignatureChecker('test')])
+                     ->onlyMethods(['getFileContents'])
+                     ->getMock();
+
+        $mock->method('getFileContents')
+             ->willReturn($contents);
+
+        return $mock;
+    }
+
+    public function testInvalidSignature()
+    {
+        $infoMock = $this->getMockedProvider("test1\nline1\nline2\nline3");
+
+        $this->expectException(InvalidSignatureException::class);
+        $this->expectExceptionMessage('Invalid dictionary signature.');
+
+        /** @var FileDictInfo $infoMock */
+        $infoMock->getProvider();
+    }
+
+    public function testCannotBeEmpty()
+    {
+        $info = $this->getMockedProvider("test\n\n\n\n\n");
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Invalid info file: test.ifo');
+
+        /** @var FileDictInfo $info */
+        $info->getProvider();
+    }
+
+    public function testMustBeFourLinesAtMinumim()
+    {
+        $infoMock = $this->getMockedProvider("test\nline1\nline2\n");
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Invalid info file: test.ifo');
+
+        /** @var FileDictInfo $infoMock */
+        $infoMock->getProvider();
+    }
+
+    public function testRequiredFields()
+    {
+        $info = $this->getMockedProvider("test\nbookname=Test\nwordcount=100\nidxfilesize=255\n");
+
+        /** @var FileDictInfo $info */
+        $dict = $info->getProvider()->getDict();
+
+        $this->assertEquals('Test', $dict->getBookname());
+        $this->assertEquals(100, $dict->getWordCount());
+        $this->assertEquals(255, $dict->getIndexFilesize());
+    }
+
+    public function testFieldsCase()
+    {
+        $info = $this->getMockedProvider("test\nBookName=Test\nWordCount=100\nIdxFileSize=255\n");
+
+        /** @var FileDictInfo $info */
+        $dict = $info->getProvider()->getDict();
+
+        $this->assertEquals('Test', $dict->getBookname());
+        $this->assertEquals(100, $dict->getWordCount());
+        $this->assertEquals(255, $dict->getIndexFilesize());
+    }
+}
