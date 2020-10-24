@@ -8,28 +8,34 @@ class DictInfoFile
 {
     private string $filename;
     private SignatureChecker $signature;
+    private ?DictArrayProvider $provider;
 
     public function __construct(string $filename, SignatureChecker $signature)
     {
         $this->filename = $filename;
         $this->signature = $signature;
+        $this->provider = null;
     }
 
     public function getProvider(): DictProvider
     {
-        $lines = $this->explodeContents(
-            $this->getFileContents($this->filename)
-        );
-
-        // Signature + 3 required lines (see docs).
-        if (count($lines) < 4) {
-            throw new RuntimeException('Invalid info file: ' . $this->filename);
+        if (!$this->provider) {
+            $lines = $this->explodeContents(
+                $this->getFileContents($this->filename)
+            );
+    
+            // Signature + 3 required lines (see docs).
+            if (count($lines) < 4) {
+                throw new RuntimeException('Invalid info file: ' . $this->filename);
+            }
+    
+            $signature = array_shift($lines);
+            $this->signature->checkAndThrow($signature);
+    
+            $this->provider = new DictArrayProvider($lines);
         }
 
-        $signature = array_shift($lines);
-        $this->signature->checkAndThrow($signature);
-
-        return new DictArrayProvider($lines);
+        return $this->provider;
     }
 
     public function getFileContents(): string
