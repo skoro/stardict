@@ -2,7 +2,7 @@
 
 namespace StarDict\Index;
 
-class Offset
+class DataOffsetItem
 {
     private string $query;
     private int $offset;
