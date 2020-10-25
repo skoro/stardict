@@ -31,13 +31,14 @@ class BinaryIndexHandler implements IndexDataHandler
             $chars = [];
             while (TRUE) {
                 $x = unpack("@{$pos}/Cch", $this->data);
-                $pos++;
-                if ($x['ch'] === 0) {
+                if ($x['ch'] === 0 && $pos !== 0) {
                     break;
                 }
                 $chars[] = $x['ch'];
+                $pos++;
             }
             $word = pack('C*', ...$chars);
+            $pos++;
             $x = unpack("@{$pos}/Noffset/Nsize", $this->data);
             yield $word => new DataOffsetItem($word, $x['offset'], $x['size']);
             $pos += 8;
