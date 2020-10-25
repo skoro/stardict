@@ -39,7 +39,7 @@ class BinaryIndexHandler implements IndexDataHandler
             }
             $word = pack('C*', ...$chars);
             $x = unpack("@{$pos}/Noffset/Nsize", $this->data);
-            yield $word => new DataOffsetItem($word, $x['offset'], $x['length']);
+            yield $word => new DataOffsetItem($word, $x['offset'], $x['size']);
             $pos += 8;
         }
     }
