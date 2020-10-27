@@ -8,9 +8,10 @@ use StarDict\Index\DataOffsetItem;
 interface DataReader
 {
     /**
+     * @param DataOffsetItem $offset
      * @param TypeSequence[] $sequences
      *
-     * @return TypeSequence[]
+     * @return Chunk[]
      */
     public function readFromOffset(DataOffsetItem $offset, array $sequences): array;
 }
