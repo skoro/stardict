@@ -7,18 +7,16 @@ namespace StarDict\DictData;
  */
 class Chunk
 {
-    private int $length;
     private string $data;
 
-    public function __construct(int $length, string $data)
+    public function __construct(string $data)
     {
-        $this->length = $length;
         $this->data = $data;
     }
 
     public function getLength(): int
     {
-        return $this->length;
+        return strlen($this->data);
     }
 
     public function getData(): string

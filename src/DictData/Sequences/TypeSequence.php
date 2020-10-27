@@ -15,7 +15,22 @@ abstract class TypeSequence
 
     public function readChunk(string $buf): Chunk
     {
-        return new Chunk(strlen($buf), $buf);
+        $pos = 0;
+        $length = strlen($buf);
+
+        while ($pos < $length) {
+            $bytes = unpack('cchr', $buf, $pos++);
+            if ($bytes['chr'] == '\0') {
+                return $this->createChunk(substr($buf, 0, $pos - 1));
+            }
+        }
+
+        return $this->createChunk($buf);
+    }
+
+    protected function createChunk(string $data): Chunk
+    {
+        return new Chunk($data);
     }
 
     abstract public function getId(): string;
