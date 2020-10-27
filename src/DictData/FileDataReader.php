@@ -30,9 +30,16 @@ class FileDataReader implements DataReader
     {
         $handle = $this->getFileHandle();
 
-        $this->internalRead($handle, $offset->getOffset(), $offset->getLength());
+        $chunks = [];
 
-        return [];
+        $buf = $this->internalRead($handle, $offset->getOffset(), $offset->getLength());
+        foreach ($sequences as $sequence) {
+            $chunk = $sequence->readChunk($buf);
+            $buf = substr($buf, $chunk->getLength());
+            $chunks[] = $chunk;
+        }
+
+        return $chunks;
     }
 
     protected function internalRead($handle, int $offset, int $length)

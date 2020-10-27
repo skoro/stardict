@@ -2,6 +2,8 @@
 
 namespace StarDict\DictData\Sequences;
 
+use StarDict\DictData\Chunk;
+
 abstract class TypeSequence
 {
     /**
@@ -9,6 +11,11 @@ abstract class TypeSequence
      */
     public function getValue()
     {
+    }
+
+    public function readChunk(string $buf): Chunk
+    {
+        return new Chunk(strlen($buf), $buf);
     }
 
     abstract public function getId(): string;
