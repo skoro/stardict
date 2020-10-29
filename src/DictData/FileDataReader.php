@@ -33,6 +33,10 @@ class FileDataReader implements DataReader
         $chunks = [];
 
         $buf = $this->internalRead($handle, $offset->getOffset(), $offset->getLength());
+        if (strlen($buf) < $offset->getLength()) {
+            throw new RuntimeException('Read buffer out of range.');
+        }
+
         foreach ($sequences as $sequence) {
             $chunk = $sequence->readChunk($buf);
             $buf = substr($buf, $chunk->getLength() + 1);

@@ -2,6 +2,7 @@
 
 namespace StarDict\Test;
 
+use RuntimeException;
 use StarDict\DictData\FileDataReader;
 use StarDict\DictData\Sequences\PureText;
 use StarDict\Index\DataOffsetItem;
@@ -73,5 +74,17 @@ class FileDataReaderTest extends TestCase
         $this->assertCount(2, $chunks);
         $this->assertEquals('bbbbb', $chunks[0]->getData());
         $this->assertEquals('ccccc', $chunks[1]->getData());
+    }
+
+    public function testReadBufferOutOfRange()
+    {
+        file_put_contents($this->filename, 'zxcvb');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Read buffer out of range.');
+
+        $reader = new FileDataReader($this->filename);
+        $offset = new DataOffsetItem('anything', 3, 100);
+        $reader->readFromOffset($offset, [new PureText()]);
     }
 }
