@@ -35,7 +35,7 @@ class FileDataReader implements DataReader
         $buf = $this->internalRead($handle, $offset->getOffset(), $offset->getLength());
         foreach ($sequences as $sequence) {
             $chunk = $sequence->readChunk($buf);
-            $buf = substr($buf, $chunk->getLength());
+            $buf = substr($buf, $chunk->getLength() + 1);
             $chunks[] = $chunk;
         }
 
