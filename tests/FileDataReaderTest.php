@@ -39,4 +39,39 @@ class FileDataReaderTest extends TestCase
         $this->assertEquals(1, count($chunks));
         $this->assertEquals('bbbbb', $chunks[0]->getData());
     }
+
+    public function testTwoChunks()
+    {
+        $data = str_repeat('a', 5) . "\0" . str_repeat('b', 5) . str_repeat('c', 10);
+        file_put_contents($this->filename, $data);
+
+        $reader = new FileDataReader($this->filename);
+        // read the buffer with two chunks and nul char: 5+5+1
+        $offset = new DataOffsetItem('does not matter', 0, 11);
+        $chunks = $reader->readFromOffset($offset, [
+            new PureText(),
+            new PureText(),
+        ]);
+
+        $this->assertCount(2, $chunks);
+        $this->assertEquals('aaaaa', $chunks[0]->getData());
+        $this->assertEquals('bbbbb', $chunks[1]->getData());
+    }
+
+    public function testChunksInTheEnd()
+    {
+        $data = str_repeat('a', 5) . "\0" . str_repeat('b', 5) . "\0" . str_repeat('c', 5);
+        file_put_contents($this->filename, $data);
+
+        $reader = new FileDataReader($this->filename);
+        $offset = new DataOffsetItem('anything', 6, 11);
+        $chunks = $reader->readFromOffset($offset, [
+            new PureText(),
+            new PureText(),
+        ]);
+
+        $this->assertCount(2, $chunks);
+        $this->assertEquals('bbbbb', $chunks[0]->getData());
+        $this->assertEquals('ccccc', $chunks[1]->getData());
+    }
 }
