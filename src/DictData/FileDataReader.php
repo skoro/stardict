@@ -13,14 +13,19 @@ class FileDataReader implements DataReader
     public function __construct(string $filename)
     {
         $this->filename = $filename;
-        $this->fhandle = null;
+        $this->fhandle = NULL;
     }
 
     public function __destruct()
     {
         if (is_resource($this->fhandle)) {
-            fclose($this->fhandle);
+            $this->closeFile($this->fhandle);
         }
+    }
+
+    protected function closeFile($handle)
+    {
+        fclose($handle);
     }
 
     /**
@@ -28,14 +33,25 @@ class FileDataReader implements DataReader
      */
     public function readFromOffset(DataOffsetItem $offset, array $sequences): array
     {
-        $handle = $this->getFileHandle();
+        if ($this->fhandle === NULL) {
+            if (($this->fhandle = $this->openFile()) === FALSE) {
+                throw new RuntimeException('Cannot open dict data file: ' . $this->filename);
+            }
+        }
 
-        $chunks = [];
+        if ($this->seekFile($this->fhandle, $offset->getOffset()) !== 0) {
+            throw new RuntimeException(sprintf('Seek offset %u is out of range.', $offset->getOffset()));
+        }
 
-        $buf = $this->internalRead($handle, $offset->getOffset(), $offset->getLength());
+        $buf = $this->readFile($this->fhandle, $offset->getLength());
+        if ($buf === FALSE) {
+            throw new RuntimeException(sprintf('Cannot read data chunk of %u from "%s".', $offset->getLength(), $this->filename));
+        }
         if (strlen($buf) < $offset->getLength()) {
             throw new RuntimeException('Read buffer out of range.');
         }
+
+        $chunks = [];
 
         foreach ($sequences as $sequence) {
             $chunk = $sequence->readChunk($buf);
@@ -46,31 +62,36 @@ class FileDataReader implements DataReader
         return $chunks;
     }
 
-    protected function internalRead($handle, int $offset, int $length)
+    /**
+     * @return int Seek successful 0 or -1 on error.
+     */
+    protected function seekFile($handle, int $offset): int
     {
-        if (fseek($handle, $offset, SEEK_SET) === -1) {
-            throw new RuntimeException(sprintf('Seek offset %u is out of range.', $offset));
-        }
-        if (($buf = fread($handle, $length)) === FALSE) {
-            throw new RuntimeException(sprintf('Cannot read data chunk of %u from "%s".', $length, $this->filename));
-        }
-        return $buf;
+        return fseek($handle, $offset, SEEK_SET);
     }
 
+    /**
+     * @return string|FALSE
+     */
+    protected function readFile($handle, int $length)
+    {
+        return fread($handle, $length);
+    }
+
+    /**
+     * @return resource|NULL
+     */
     protected function getFileHandle()
     {
-        if ($this->fhandle === NULL) {
-            $this->fhandle = $this->openFile();
-        }
         return $this->fhandle;
     }
 
+    /**
+     * @return resource|FALSE
+     */
     protected function openFile()
     {
-        if (($fh = fopen($this->filename, 'r')) === FALSE) {
-            throw new RuntimeException('Cannot open dict data file: ' . $this->filename);
-        }
-        return $fh;
+        return fopen($this->filename, 'r');
     }
 
     public function getFilename(): string
