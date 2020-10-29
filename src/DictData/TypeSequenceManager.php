@@ -16,6 +16,9 @@ class TypeSequenceManager
         return $this;
     }
 
+    /**
+     * @return TypeSequence[]
+     */
     public function getSequences(string $sameTypeSequence): array
     {
         if (empty($sameTypeSequence)) {
