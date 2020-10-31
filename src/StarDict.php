@@ -62,7 +62,10 @@ class StarDict
         }
     }
 
-    public function get(string $toc)
+    /**
+     * @return TypeSequence[]
+     */
+    public function get(string $toc): array
     {
         $offset = $this->offsets[$toc];
         return $this->dataReader->fillSequences($offset, $this->typeSequences);
