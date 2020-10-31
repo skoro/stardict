@@ -16,10 +16,13 @@ class TypeSequenceManager
         return $this;
     }
 
+    /**
+     * @param TypeSequence[] $sequences
+     */
     public function clear(array $sequences)
     {
         foreach ($sequences as $seq) {
-            $seq->fill('');
+            $seq->setRawValue('');
         }
     }
 
