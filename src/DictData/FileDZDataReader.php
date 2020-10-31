@@ -9,7 +9,7 @@ class FileDZDataReader extends FileDataReader
      */
     protected function openFile()
     {
-        return gzopen($this->getFilename(), 'r');
+        return @gzopen($this->getFilename(), 'r');
     }
 
     /**

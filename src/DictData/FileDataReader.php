@@ -83,7 +83,7 @@ class FileDataReader extends DataReader
      */
     protected function openFile()
     {
-        return fopen($this->filename, 'r');
+        return @fopen($this->filename, 'r');
     }
 
     public function getFilename(): string
