@@ -39,8 +39,8 @@ class FileDataReader extends DataReader
             }
         }
 
-        if ($this->seekFile($this->fhandle, $offset->getOffset()) !== 0) {
-            throw new RuntimeException(sprintf('Seek offset %u is out of range.', $offset->getOffset()));
+        if ($this->seekFile($this->fhandle, $offset->getOffset()) === FALSE) {
+            throw new RuntimeException(sprintf('Cannot seek to "%d".', $offset->getOffset()));
         }
 
         $buf = $this->readFile($this->fhandle, $offset->getLength());
@@ -55,11 +55,11 @@ class FileDataReader extends DataReader
     }
 
     /**
-     * @return int Seek successful 0 or -1 on error.
+     * @return bool
      */
-    protected function seekFile($handle, int $offset): int
+    protected function seekFile($handle, int $offset): bool
     {
-        return fseek($handle, $offset, SEEK_SET);
+        return fseek($handle, $offset, SEEK_SET) === 0;
     }
 
     /**

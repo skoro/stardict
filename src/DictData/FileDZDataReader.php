@@ -15,9 +15,9 @@ class FileDZDataReader extends FileDataReader
     /**
      * @inheritdoc
      */
-    protected function seekFile($handle, int $offset): int
+    protected function seekFile($handle, int $offset): bool
     {
-        return gzseek($handle, $offset, SEEK_SET);
+        return gzseek($handle, $offset, SEEK_SET) === 0;
     }
 
     /**
