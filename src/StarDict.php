@@ -65,7 +65,7 @@ class StarDict
     public function get(string $toc)
     {
         $offset = $this->offsets[$toc];
-        $this->dataReader->readFromOffset($offset, $this->typeSequences);
+        return $this->dataReader->fillSequences($offset, $this->typeSequences);
     }
 
     public static function createFromFiles(

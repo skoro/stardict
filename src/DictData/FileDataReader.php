@@ -5,7 +5,7 @@ namespace StarDict\DictData;
 use RuntimeException;
 use StarDict\Index\DataOffsetItem;
 
-class FileDataReader implements DataReader
+class FileDataReader extends DataReader
 {
     private string $filename;
     private $fhandle;
@@ -31,7 +31,7 @@ class FileDataReader implements DataReader
     /**
      * @inheritdoc
      */
-    public function readFromOffset(DataOffsetItem $offset, array $sequences): array
+    protected function readBuffer(DataOffsetItem $offset): string
     {
         if ($this->fhandle === NULL) {
             if (($this->fhandle = $this->openFile()) === FALSE) {
@@ -51,15 +51,7 @@ class FileDataReader implements DataReader
             throw new RuntimeException('Read buffer out of range.');
         }
 
-        $chunks = [];
-
-        foreach ($sequences as $sequence) {
-            $chunk = $sequence->readChunk($buf);
-            $buf = substr($buf, $chunk->getLength() + 1);
-            $chunks[] = $chunk;
-        }
-
-        return $chunks;
+        return $buf;
     }
 
     /**

@@ -2,35 +2,28 @@
 
 namespace StarDict\DictData\Sequences;
 
-use StarDict\DictData\Chunk;
-
 abstract class TypeSequence
 {
+    private string $value = '';
+
     /**
      * @return mixed
      */
     public function getValue()
     {
+        return $this->value;
     }
 
-    public function readChunk(string $buf): Chunk
+    public function setRawValue(string $value): self
     {
-        $pos = 0;
-        $length = strlen($buf);
-
-        while ($pos < $length) {
-            $bytes = unpack('cchr', $buf, $pos++);
-            if ($bytes['chr'] == '\0') {
-                return $this->createChunk(substr($buf, 0, $pos - 1));
-            }
-        }
-
-        return $this->createChunk($buf);
+        $this->value = $value;
+        return $this;
     }
 
-    protected function createChunk(string $data): Chunk
+    public function clear(): self
     {
-        return new Chunk($data);
+        $this->value = '';
+        return $this;
     }
 
     abstract public function getId(): string;

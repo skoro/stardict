@@ -16,6 +16,13 @@ class TypeSequenceManager
         return $this;
     }
 
+    public function clear(array $sequences)
+    {
+        foreach ($sequences as $seq) {
+            $seq->fill('');
+        }
+    }
+
     /**
      * @return TypeSequence[]
      */

@@ -33,12 +33,12 @@ class FileDataReaderTest extends TestCase
 
         $reader = new FileDataReader($this->filename);
         $offset = new DataOffsetItem('test', 10, 5);
-        $chunks = $reader->readFromOffset($offset, [
+        $seq = $reader->fillSequences($offset, [
             new PureText(),
         ]);
 
-        $this->assertEquals(1, count($chunks));
-        $this->assertEquals('bbbbb', $chunks[0]->getData());
+        $this->assertEquals(1, count($seq));
+        $this->assertEquals('bbbbb', $seq[0]->getValue());
     }
 
     public function testTwoChunks()
@@ -49,14 +49,14 @@ class FileDataReaderTest extends TestCase
         $reader = new FileDataReader($this->filename);
         // read the buffer with two chunks and nul char: 5+5+1
         $offset = new DataOffsetItem('does not matter', 0, 11);
-        $chunks = $reader->readFromOffset($offset, [
+        $seq = $reader->fillSequences($offset, [
             new PureText(),
             new PureText(),
         ]);
 
-        $this->assertCount(2, $chunks);
-        $this->assertEquals('aaaaa', $chunks[0]->getData());
-        $this->assertEquals('bbbbb', $chunks[1]->getData());
+        $this->assertCount(2, $seq);
+        $this->assertEquals('aaaaa', $seq[0]->getValue());
+        $this->assertEquals('bbbbb', $seq[1]->getValue());
     }
 
     public function testChunksInTheEnd()
@@ -66,14 +66,14 @@ class FileDataReaderTest extends TestCase
 
         $reader = new FileDataReader($this->filename);
         $offset = new DataOffsetItem('anything', 6, 11);
-        $chunks = $reader->readFromOffset($offset, [
+        $seq = $reader->fillSequences($offset, [
             new PureText(),
             new PureText(),
         ]);
 
-        $this->assertCount(2, $chunks);
-        $this->assertEquals('bbbbb', $chunks[0]->getData());
-        $this->assertEquals('ccccc', $chunks[1]->getData());
+        $this->assertCount(2, $seq);
+        $this->assertEquals('bbbbb', $seq[0]->getValue());
+        $this->assertEquals('ccccc', $seq[1]->getValue());
     }
 
     public function testReadBufferOutOfRange()
@@ -85,6 +85,6 @@ class FileDataReaderTest extends TestCase
 
         $reader = new FileDataReader($this->filename);
         $offset = new DataOffsetItem('anything', 3, 100);
-        $reader->readFromOffset($offset, [new PureText()]);
+        $reader->fillSequences($offset, [new PureText()]);
     }
 }
