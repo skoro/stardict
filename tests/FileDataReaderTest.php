@@ -1,12 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace StarDict\Test;
+namespace StarDict\Tests;
 
 use RuntimeException;
 use StarDict\DictData\FileDataReader;
 use StarDict\DictData\Sequences\PureText;
 use StarDict\Index\DataOffsetItem;
-use StarDict\Tests\TestCase;
 
 class FileDataReaderTest extends TestCase
 {
@@ -26,60 +25,37 @@ class FileDataReaderTest extends TestCase
         parent::tearDown();
     }
 
-    public function testOneChunkPureText()
+    public function testOpenNotFound()
     {
-        $data = str_repeat('a', 10) . str_repeat('b', 5) . str_repeat('c', 8);
-        file_put_contents($this->filename, $data);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Cannot open dict data file: not-found.dic');
 
-        $reader = new FileDataReader($this->filename);
-        $offset = new DataOffsetItem('test', 10, 5);
-        $seq = $reader->fillSequences($offset, [
-            new PureText(),
-        ]);
-
-        $this->assertEquals(1, count($seq));
-        $this->assertEquals('bbbbb', $seq[0]->getValue());
+        $reader = new FileDataReader('not-found.dic');
+        $reader->fillSequences(new DataOffsetItem('', 0, 0), []);
     }
 
-    public function testTwoChunks()
+    public function testSeekOutRange()
     {
-        $data = str_repeat('a', 5) . "\0" . str_repeat('b', 5) . str_repeat('c', 10);
-        file_put_contents($this->filename, $data);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Read buffer out of range.');
 
+        file_put_contents($this->filename, 'abcdef');
         $reader = new FileDataReader($this->filename);
-        // read the buffer with two chunks and nul char: 5+5+1
-        $offset = new DataOffsetItem('does not matter', 0, 11);
-        $seq = $reader->fillSequences($offset, [
-            new PureText(),
-            new PureText(),
-        ]);
-
-        $this->assertCount(2, $seq);
-        $this->assertEquals('aaaaa', $seq[0]->getValue());
-        $this->assertEquals('bbbbb', $seq[1]->getValue());
+        $reader->fillSequences(new DataOffsetItem('', 999, 10), []);
     }
 
-    public function testChunksInTheEnd()
+    public function testReadMoreThanExist()
     {
-        $data = str_repeat('a', 5) . "\0" . str_repeat('b', 5) . "\0" . str_repeat('c', 5);
-        file_put_contents($this->filename, $data);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Read buffer out of range.');
 
+        file_put_contents($this->filename, 'abcdef');
         $reader = new FileDataReader($this->filename);
-        $offset = new DataOffsetItem('anything', 6, 11);
-        $seq = $reader->fillSequences($offset, [
-            new PureText(),
-            new PureText(),
-        ]);
-
-        $this->assertCount(2, $seq);
-        $this->assertEquals('bbbbb', $seq[0]->getValue());
-        $this->assertEquals('ccccc', $seq[1]->getValue());
+        $reader->fillSequences(new DataOffsetItem('', 0, 999), []);
     }
 
     public function testReadBufferOutOfRange()
     {
-        file_put_contents($this->filename, 'zxcvb');
-
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Read buffer out of range.');
 
