@@ -4,22 +4,29 @@ namespace StarDict;
 
 use Directory;
 use RuntimeException;
+use StarDict\Files\Factory;
+use StarDict\Files\File;
 
 /**
  * Scans directories for StarDict files.
  */
-class DirScan
+class DirectoryScanner
 {
     private string $baseDir;
+    private Factory $filesFactory;
 
     /**
      * @param string $baseDir The base directory from scan.
      */
-    public function __construct(string $baseDir)
+    public function __construct(string $baseDir, Factory $filesFactory)
     {
         $this->baseDir = $baseDir;
+        $this->filesFactory = $filesFactory;
     }
 
+    /**
+     * @return DictFiles[]
+     */
     protected function internalScan(string $subDir = '', array $files = []): array
     {
         $dir = $this->initDir($subDir);
@@ -32,22 +39,9 @@ class DirScan
             if (is_dir($filepath)) {
                 $files = array_merge($files, $this->internalScan($filepath, $files));
             } else {
-                if (substr($filename, -4) === '.ifo') {
-                    $ext = 'ifo';
-                } elseif (substr($filename, -4) === '.idx') {
-                    $ext = 'idx';
-                } elseif (substr($filename, -5) === '.dict') {
-                    $ext = 'dict';
-                } elseif (substr($filename, -8) === '.dict.dz') {
-                    $ext = 'dict.dz';
-                } else {
-                    continue;
+                if ($this->filesFactory->isDictFile($filepath)) {
+                    $files[] = $this->filesFactory->createFileFromFilename($filepath);
                 }
-                $idx = $subDir . DIRECTORY_SEPARATOR . basename($filename, ".$ext");
-                if (substr($ext, -3) === '.dz') {
-                    $ext = substr($ext, 0, -3);
-                }
-                $files[$idx][$ext] = $filepath;
             }
         }
         $dir->close();
@@ -64,17 +58,30 @@ class DirScan
     }
 
     /**
-     * @return StarDict[]
-     *
      * @throws RuntimeException When scanning is failed.
      */
     public function scan(): array
     {
-        $dicts = [];
-        $dirFiles = $this->internalScan($this->baseDir);
-        foreach ($dirFiles as $files) {
-            $dicts[] = StarDict::createFromFiles($files['ifo'], $files['idx'], $files['dict']);
+        return $this->groupFiles($this->internalScan($this->baseDir));
+    }
+
+    /**
+     * @param File[] $files
+     *
+     * @return DictFiles[]
+     */
+    protected function groupFiles(array $files): array
+    {
+        $groups = [];
+        foreach ($files as $file) {
+            $dir = dirname($file->getFilename());
+            $filename = basename($file->getFilename(), $file->getExtension());
+            $id = $dir . DIRECTORY_SEPARATOR . $filename;
+            if (!isset($groups[$id])) {
+                $groups[$id] = new DictFiles();
+            }
+            $groups[$id]->add($file);
         }
-        return $dicts;
+        return $groups;
     }
 }

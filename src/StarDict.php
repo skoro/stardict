@@ -5,13 +5,17 @@ namespace StarDict;
 use RuntimeException;
 use StarDict\DictData\DataReader;
 use StarDict\DictData\FileDataReader;
+use StarDict\DictData\FileDZDataReader;
 use StarDict\DictData\Sequences\{
     PhoneticString, PngFile, PureText, TypeSequence, WavFile,
 };
 use StarDict\DictData\TypeSequenceManager;
+use StarDict\Files\Factory;
+use StarDict\Files\File;
 use StarDict\Index\DataOffsetItem;
 use StarDict\Index\FileIndexProvider;
 use StarDict\Index\IndexDataHandler;
+use StarDict\Index\IndexProvider;
 use StarDict\Info\DictInfoFile;
 use StarDict\Info\DictProvider;
 use StarDict\Info\SignatureChecker;
@@ -72,26 +76,44 @@ class StarDict
     }
 
     public static function createFromFiles(
-        string $fileIfo,
+        string $fileInfo,
         string $fileIdx,
         string $fileDict
     ): self {
-        $dict = static::createDictProviderFromFile($fileIfo)->getDict();
-        $index = new FileIndexProvider($fileIdx, $dict->getIndexFilesize());
-        $reader = new FileDataReader($fileDict);
+        return static::create(
+            DictFiles::create($fileInfo, $fileIdx, $fileDict, new Factory())
+        );
+    }
+
+    public static function create(DictFiles $files): self
+    {
+        $infoProvider = static::createInfoProvider($files->getInfo());
+        $dict = $infoProvider->getDict();
+        $indexProvider = static::createIndexProvider($files->getIndex(), $dict->getIndexFilesize());
+
+        if ($files->isDictCompressed()) {
+            $reader = new FileDZDataReader($files->getDict()->getFilename());
+        } else {
+            $reader = new FileDataReader($files->getDict()->getFilename());
+        }
 
         return new static(
             $dict,
-            $index->getIndexDataHandler(),
+            $indexProvider->getIndexDataHandler(),
             $reader,
             static::createTypeSequenceManager()
         );
     }
 
-    protected static function createDictProviderFromFile(string $filename): DictProvider
+    protected static function createInfoProvider(File $file): DictProvider
     {
-        $info = new DictInfoFile($filename, new SignatureChecker());
+        $info = new DictInfoFile($file->getFilename(), new SignatureChecker());
         return $info->getProvider();
+    }
+
+    protected static function createIndexProvider(File $file, int $indexSize): IndexProvider
+    {
+        return new FileIndexProvider($file->getFilename(), $indexSize);
     }
 
     public function getDict(): Dict
