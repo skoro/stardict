@@ -16,14 +16,12 @@ class TypeSequenceManager
         return $this;
     }
 
-    /**
-     * @param TypeSequence[] $sequences
-     */
-    public function clear(array $sequences)
+    public function clear(): self
     {
-        foreach ($sequences as $seq) {
-            $seq->setRawValue('');
+        foreach ($this->types as $type) {
+            $type->clear();
         }
+        return $this;
     }
 
     /**
