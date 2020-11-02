@@ -3,16 +3,17 @@
 namespace StarDict\Index;
 
 use RuntimeException;
+use StarDict\Files\IndexFile;
 
 class FileIndexProvider implements IndexProvider
 {
-    private string $filename;
+    private IndexFile $file;
     private int $indexSize;
     private ?BinaryIndexHandler $handler;
 
-    public function __construct(string $filename, int $indexSize)
+    public function __construct(IndexFile $file, int $indexSize)
     {
-        $this->filename = $filename;
+        $this->file = $file;
         $this->indexSize = $indexSize;
         $this->handler = null;
     }
@@ -28,15 +29,15 @@ class FileIndexProvider implements IndexProvider
 
     protected function loadBinaryData(): string
     {
-        if (($data = @file_get_contents($this->filename)) === FALSE) {
-            throw new RuntimeException('Cannot read index data file: ' . $this->filename);
+        if (($data = @file_get_contents($this->file->getFilename())) === FALSE) {
+            throw new RuntimeException('Cannot read index data file: ' . $this->file);
         }
         return $data;
     }
 
     protected function checkIndexSize()
     {
-        $fileSize = filesize($this->filename);
+        $fileSize = filesize($this->file->getFilename());
         if ($this->indexSize != $fileSize) {
             throw new RuntimeException('Invalid index file size.');
         }

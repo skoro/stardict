@@ -128,7 +128,7 @@ class StarDict
 
     protected static function createIndexProvider(File $file, int $indexSize): IndexProvider
     {
-        return new FileIndexProvider($file->getFilename(), $indexSize);
+        return new FileIndexProvider($file, $indexSize);
     }
 
     public function getDict(): Dict
