@@ -36,6 +36,8 @@ class StarDict
      */
     private array $typeSequences;
 
+    private bool $needBuildOffsets;
+
     public function __construct(
         Dict $dict,
         IndexDataHandler $indexHandler,
@@ -47,9 +49,9 @@ class StarDict
         $this->dataReader = $dataReader;
         $this->offsets = [];
         $this->typeSequences = $typeSequenceManager->getSequences($dict->getSameTypeSequence());
+        $this->needBuildOffsets = TRUE;
 
         $this->checkVersion();
-        $this->buildOffsets();
     }
 
     protected function checkVersion(): void
@@ -61,8 +63,11 @@ class StarDict
 
     protected function buildOffsets(): void
     {
-        foreach ($this->indexHandler->getDataOffsets() as $index => $offset) {
-            $this->offsets[$index] = $offset;
+        if ($this->needBuildOffsets) {
+            foreach ($this->indexHandler->getDataOffsets() as $index => $offset) {
+                $this->offsets[$index] = $offset;
+            }
+            $this->needBuildOffsets = FALSE;
         }
     }
 
@@ -71,8 +76,18 @@ class StarDict
      */
     public function get(string $toc): array
     {
+        $this->buildOffsets();
         $offset = $this->offsets[$toc];
         return $this->dataReader->fillSequences($offset, $this->typeSequences);
+    }
+
+    /**
+     * @return DataOffsetItem[]
+     */
+    public function getOffsets(): array
+    {
+        $this->buildOffsets();
+        return $this->offsets;
     }
 
     public static function createFromFiles(
