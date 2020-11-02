@@ -107,9 +107,9 @@ class StarDict
         $indexProvider = static::createIndexProvider($files->getIndex(), $dict->getIndexFilesize());
 
         if ($files->isDictCompressed()) {
-            $reader = new FileDZDataReader($files->getDict()->getFilename());
+            $reader = new FileDZDataReader($files->getDict());
         } else {
-            $reader = new FileDataReader($files->getDict()->getFilename());
+            $reader = new FileDataReader($files->getDict());
         }
 
         return new static(

@@ -2,7 +2,7 @@
 
 namespace StarDict\Files;
 
-class DZDictFile extends File
+class DZDictFile extends DictFile
 {
     public static function extension(): string
     {

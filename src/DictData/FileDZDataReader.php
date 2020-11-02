@@ -2,14 +2,21 @@
 
 namespace StarDict\DictData;
 
+use StarDict\Files\DZDictFile;
+
 class FileDZDataReader extends FileDataReader
 {
+    public function __construct(DZDictFile $file)
+    {
+        parent::__construct($file);
+    }
+
     /**
      * @inheritdoc
      */
     protected function openFile()
     {
-        return @gzopen($this->getFilename(), 'r');
+        return @gzopen($this->getFile()->getFilename(), 'r');
     }
 
     /**

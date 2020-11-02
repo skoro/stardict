@@ -3,16 +3,17 @@
 namespace StarDict\DictData;
 
 use RuntimeException;
+use StarDict\Files\DictFile;
 use StarDict\Index\DataOffsetItem;
 
 class FileDataReader extends DataReader
 {
-    private string $filename;
+    private DictFile $file;
     private $fhandle;
 
-    public function __construct(string $filename)
+    public function __construct(DictFile $file)
     {
-        $this->filename = $filename;
+        $this->file = $file;
         $this->fhandle = NULL;
     }
 
@@ -35,7 +36,7 @@ class FileDataReader extends DataReader
     {
         if ($this->fhandle === NULL) {
             if (($this->fhandle = $this->openFile()) === FALSE) {
-                throw new RuntimeException('Cannot open dict data file: ' . $this->filename);
+                throw new RuntimeException('Cannot open dict data file: ' . $this->file);
             }
         }
 
@@ -45,7 +46,7 @@ class FileDataReader extends DataReader
 
         $buf = $this->readFile($this->fhandle, $offset->getLength());
         if ($buf === FALSE) {
-            throw new RuntimeException(sprintf('Cannot read data chunk of %u from "%s".', $offset->getLength(), $this->filename));
+            throw new RuntimeException(sprintf('Cannot read data chunk of %u from "%s".', $offset->getLength(), $this->file));
         }
         if (strlen($buf) < $offset->getLength()) {
             throw new RuntimeException('Read buffer out of range.');
@@ -83,11 +84,11 @@ class FileDataReader extends DataReader
      */
     protected function openFile()
     {
-        return @fopen($this->filename, 'r');
+        return @fopen($this->file->getFilename(), 'r');
     }
 
-    public function getFilename(): string
+    public function getFile(): DictFile
     {
-        return $this->filename;
+        return $this->file;
     }
 }
