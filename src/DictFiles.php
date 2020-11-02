@@ -13,9 +13,9 @@ use StarDict\Files\InfoFile;
 
 class DictFiles
 {
-    private ?File $info;
-    private ?File $index;
-    private ?File $dict;
+    private ?File $info = NULL;
+    private ?File $index = NULL;
+    private ?File $dict = NULL;
 
     public static function create(
         string $info,
@@ -71,5 +71,10 @@ class DictFiles
     public function isDictCompressed(): bool
     {
         return $this->dict instanceof DZDictFile;
+    }
+
+    public function hasAllFiles(): bool
+    {
+        return $this->info && $this->index && $this->dict;
     }
 }
