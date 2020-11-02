@@ -122,7 +122,7 @@ class StarDict
 
     protected static function createInfoProvider(File $file): DictProvider
     {
-        $info = new DictInfoFile($file->getFilename(), new SignatureChecker());
+        $info = new DictInfoFile($file, new SignatureChecker());
         return $info->getProvider();
     }
 

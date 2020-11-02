@@ -3,16 +3,17 @@
 namespace StarDict\Info;
 
 use RuntimeException;
+use StarDict\Files\InfoFile;
 
 class DictInfoFile
 {
-    private string $filename;
+    private InfoFile $file;
     private SignatureChecker $signature;
     private ?DictArrayProvider $provider;
 
-    public function __construct(string $filename, SignatureChecker $signature)
+    public function __construct(InfoFile $file, SignatureChecker $signature)
     {
-        $this->filename = $filename;
+        $this->file = $file;
         $this->signature = $signature;
         $this->provider = null;
     }
@@ -21,12 +22,12 @@ class DictInfoFile
     {
         if (!$this->provider) {
             $lines = $this->explodeContents(
-                $this->getFileContents($this->filename)
+                $this->getFileContents()
             );
     
             // Signature + 3 required lines (see docs).
             if (count($lines) < 4) {
-                throw new RuntimeException('Invalid info file: ' . $this->filename);
+                throw new RuntimeException('Invalid info file: ' . $this->file);
             }
     
             $signature = array_shift($lines);
@@ -40,9 +41,9 @@ class DictInfoFile
 
     public function getFileContents(): string
     {
-        $buf = @file_get_contents($this->filename);
+        $buf = @file_get_contents($this->file->getFilename());
         if ($buf === FALSE) {
-            throw new RuntimeException('Cannot read file: ' . $this->filename);
+            throw new RuntimeException('Cannot read file: ' . $this->file);
         }
         return trim($buf);
     }

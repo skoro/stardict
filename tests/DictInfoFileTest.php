@@ -4,6 +4,7 @@ namespace StarDict\Tests;
 
 use RuntimeException;
 use StarDict\Exception\InvalidSignatureException;
+use StarDict\Files\InfoFile;
 use StarDict\Info\DictInfoFile;
 use StarDict\Info\SignatureChecker;
 
@@ -11,8 +12,9 @@ class DictInfoFileTest extends TestCase
 {
     protected function getMockedProvider(string $contents)
     {
+        $file = new InfoFile('test.ifo');
         $mock = $this->getMockBuilder(DictInfoFile::class)
-                     ->setConstructorArgs(['test.ifo', new SignatureChecker('test')])
+                     ->setConstructorArgs([$file, new SignatureChecker('test')])
                      ->onlyMethods(['getFileContents'])
                      ->getMock();
 
