@@ -15,7 +15,7 @@ require dirname(__FILE__) . '/vendor/autoload.php';
 
 $dict = StarDict::createFromFiles('dict.ifo', 'dict.idx', 'dict.dict.dz');
 
-echo $dict->getBookname(); // show dict name.
+echo $dict->getDict()->getBookname(); // show dict name.
 
 foreach ($dict->get('word') as $result) {
     echo $result->getValue();
