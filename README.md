@@ -1,43 +1,28 @@
-# stardict
-PHP interface to StarDict dictionaries
-
-Install composer:
-```
-curl -sS https://getcomposer.org/installer | php
-```
+# StarDict
+Provides PHP interface to StarDict dictionaries.
 
 Install via composer:
 ```
-php composer.phar require "skoro/stardict" "@dev"
+composer require "skoro/stardict" "@dev"
 ```
 
 ## Usage
 
 ```php
+use StarDict\StarDict;
+
 require dirname(__FILE__) . '/vendor/autoload.php';
 
-// Open dict's info, index and data.
-$info = new skoro\stardict\Info('full-rus-eng.ifo');
-$index = new skoro\stardict\Index($info);
-$dict = new skoro\stardict\Dict($index);
+$dict = StarDict::createFromFiles('dict.ifo', 'dict.idx', 'dict.dict.dz');
 
-// Lookup word.
-print $dict->lookup('ведро');
+echo $dict->getBookname(); // show dict name.
+
+foreach ($dict->get('word') as $result) {
+    echo $result->getValue();
+}
 ```
 
+## Caveats
 
-## Command line utilities
-
-There are two command line utilities (`vendor/bin`):
-* `star2db` for convert dictionary to SQL database (which supported by PHP PDO).
-* `starquery` for query words in dictionary.
-
-
-## Convert dictionaries
-
-Use `star2db` command line utility. For example, convert `dictionary` to SQLite database:
-```
-star2db sqlite:/my/db.sq3 dictionary.ifo
-```
-For more options see `star2db --help` output.
-
+- Only 2.4.2 StarDict version is supported.
+- Option `sametypesequence` is required and cannot be empty.
