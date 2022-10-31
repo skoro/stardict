@@ -2,6 +2,7 @@
     "name": "skoro/stardict",
     "description": "Provides interface to StarDict dictionaries.",
     "type": "library",
+    "license": "MIT",
     "keywords": ["stardict", "dictionary"],
     "authors": [
         {
