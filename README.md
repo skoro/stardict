@@ -3,7 +3,7 @@ Provides PHP interface to StarDict dictionaries.
 
 Install via composer:
 ```
-composer require "skoro/stardict" "@dev"
+composer require skoro/stardict
 ```
 
 ## Usage
