@@ -6,7 +6,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use StarDict\Files\DictFile;
 use StarDict\Files\DZDictFile;
-use StarDict\Files\Factory;
+use StarDict\Files\Factory as FileFactory;
 use StarDict\Files\File;
 use StarDict\Files\IndexFile;
 use StarDict\Files\InfoFile;
@@ -21,7 +21,7 @@ class DictFiles
         string $info,
         string $index,
         string $dict,
-        Factory $fileFactory
+        FileFactory $fileFactory
     ): self {
         $me = new static();
         $me->add($fileFactory->createFileFromFilename($info))
@@ -30,30 +30,60 @@ class DictFiles
         return $me;
     }
 
+    public function hasInfo(): bool
+    {
+        return $this->info !== NULL;
+    }
+
+    /**
+     * @throws RuntimeException When dict info file is missing.
+     */
     public function getInfo(): File
     {
-        if ($this->info === NULL) {
-            throw new RuntimeException('Info is missing.');
+        if ($this->hasInfo()) {
+            return $this->info;
         }
-        return $this->info;
+
+        throw new RuntimeException('Info is missing.');
     }
 
+    public function hasIndex(): bool
+    {
+        return $this->index !== null;
+    }
+
+    /**
+     * @throws RuntimeException When dict index file is missing.
+     */
     public function getIndex(): File
     {
-        if ($this->index === NULL) {
-            throw new RuntimeException('Index is missing.');
+        if ($this->hasIndex()) {
+            return $this->index;
         }
-        return $this->index;
+
+        throw new RuntimeException('Index is missing.');
     }
 
+    public function hasDict(): bool
+    {
+        return $this->dict !== null;
+    }
+
+    /**
+     * @throws RuntimeException When dict data file is missing.
+     */
     public function getDict(): File
     {
-        if ($this->dict === NULL) {
-            throw new RuntimeException('Dictionary data is missing.');
+        if ($this->hasDict()) {
+            return $this->dict;
         }
-        return $this->dict;
+
+        throw new RuntimeException('Dictionary data is missing.');
     }
 
+    /**
+     * @param InfoFile|IndexFile|DictFile|DZDictFile $file
+     */
     public function add(File $file): self
     {
         if ($file instanceof InfoFile) {
@@ -75,6 +105,6 @@ class DictFiles
 
     public function hasAllFiles(): bool
     {
-        return $this->info && $this->index && $this->dict;
+        return $this->hasInfo() && $this->hasIndex() && $this->hasDict();
     }
 }
