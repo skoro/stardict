@@ -38,7 +38,7 @@ class StarDict
 
     private bool $needBuildOffsets;
 
-    public function __construct(
+    public final function __construct(
         Dict $dict,
         IndexDataHandler $indexHandler,
         DataReader $dataReader,
