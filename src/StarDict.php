@@ -40,7 +40,7 @@ class StarDict
      * @param bool $versionCheck Whether to check StarDict version.
      * @throws RuntimeException When the StarDict version is not supported.
      */
-    public function __construct(
+    public final function __construct(
         Dict $dict,
         IndexDataHandler $indexHandler,
         DataReader $dataReader,
