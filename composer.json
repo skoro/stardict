@@ -6,17 +6,22 @@
     "keywords": ["stardict", "dictionary"],
     "authors": [
         {
-            "name": "Skorobogatko Oleksii",
+            "name": "Oleksii Skorobogatko",
             "email": "skorobogatko.oleksii@gmail.com"
         }
     ],
+    "support": {
+        "source": "https://github.com/skoro/stardict",
+        "issues": "https://github.com/skoro/stardict/issues"
+    },
     "autoload": {
         "psr-4": {
             "StarDict\\": "src"
         }
     },
     "require": {
-        "php": ">=7.4"
+        "php": ">=7.4",
+        "ext-zlib": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.4",
