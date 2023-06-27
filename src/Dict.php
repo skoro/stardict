@@ -15,42 +15,42 @@ class Dict
 
     public function getVersion(): string
     {
-        return (string) $this->data['version'] ?? '';        
+        return (string) ($this->data['version'] ?? '');
     }
 
     public function getBookname(): string
     {
-        return (string) $this->data['bookname'] ?? '';
+        return (string) ($this->data['bookname'] ?? '');
     }
 
     public function getWordCount(): int
     {
-        return (int) $this->data['wordcount'] ?? 0;
+        return (int) ($this->data['wordcount'] ?? 0);
     }
 
     public function getIndexFilesize(): int
     {
-        return (int) $this->data['idxfilesize'] ?? 0;
+        return (int) ($this->data['idxfilesize'] ?? 0);
     }
 
     public function getAuthor(): string
     {
-        return (string) $this->data['author'] ?? '';
+        return (string) ($this->data['author'] ?? '');
     }
 
     public function getEmail(): string
     {
-        return (string) $this->data['email'] ?? '';
+        return (string) ($this->data['email'] ?? '');
     }
 
     public function getWebsite(): string
     {
-        return (string) $this->data['website'] ?? '';
+        return (string) ($this->data['website'] ?? '');
     }
 
     public function getDescription(): string
     {
-        return (string) $this->data['description'] ?? '';
+        return (string) ($this->data['description'] ?? '');
     }
 
     public function getDate(): DateTime
@@ -60,6 +60,6 @@ class Dict
 
     public function getSameTypeSequence(): string
     {
-        return (string) $this->data['sametypesequence'] ?? '';
+        return (string) ($this->data['sametypesequence'] ?? '');
     }
 }
