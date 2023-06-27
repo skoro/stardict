@@ -6,9 +6,7 @@ use RuntimeException;
 use StarDict\DictData\DataReader;
 use StarDict\DictData\FileDataReader;
 use StarDict\DictData\FileDZDataReader;
-use StarDict\DictData\Sequences\{
-    PhoneticString, PngFile, PureText, TypeSequence, WavFile,
-};
+use StarDict\DictData\Sequences\{HtmlCodes, PhoneticString, PngFile, PureText, TypeSequence, WavFile};
 use StarDict\DictData\TypeSequenceManager;
 use StarDict\Files\Factory;
 use StarDict\Files\File;
@@ -38,11 +36,16 @@ class StarDict
 
     private bool $needBuildOffsets;
 
+    /**
+     * @param bool $versionCheck Whether to check StarDict version.
+     * @throws RuntimeException When the StarDict version is not supported.
+     */
     public final function __construct(
         Dict $dict,
         IndexDataHandler $indexHandler,
         DataReader $dataReader,
-        TypeSequenceManager $typeSequenceManager
+        TypeSequenceManager $typeSequenceManager,
+        bool $versionCheck = true
     ) {
         $this->dict = $dict;
         $this->indexHandler = $indexHandler;
@@ -51,7 +54,9 @@ class StarDict
         $this->typeSequences = $typeSequenceManager->getSequences($dict->getSameTypeSequence());
         $this->needBuildOffsets = TRUE;
 
-        $this->checkVersion();
+        if ($versionCheck) {
+            $this->checkVersion();
+        }
     }
 
     protected function checkVersion(): void
@@ -93,14 +98,16 @@ class StarDict
     public static function createFromFiles(
         string $fileInfo,
         string $fileIdx,
-        string $fileDict
+        string $fileDict,
+        bool $versionCheck = true
     ): self {
         return static::create(
-            DictFiles::create($fileInfo, $fileIdx, $fileDict, new Factory())
+            DictFiles::create($fileInfo, $fileIdx, $fileDict, new Factory()),
+            $versionCheck
         );
     }
 
-    public static function create(DictFiles $files): self
+    public static function create(DictFiles $files, bool $versionCheck = true): self
     {
         $infoProvider = static::createInfoProvider($files->getInfo());
         $dict = $infoProvider->getDict();
@@ -116,7 +123,8 @@ class StarDict
             $dict,
             $indexProvider->getIndexDataHandler(),
             $reader,
-            static::createTypeSequenceManager()
+            static::createTypeSequenceManager(),
+            $versionCheck
         );
     }
 
@@ -143,6 +151,7 @@ class StarDict
             ->register(new PhoneticString())
             ->register(new PngFile())
             ->register(new WavFile())
+            ->register(new HtmlCodes())
             ;
     }
 }
