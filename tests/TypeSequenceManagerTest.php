@@ -4,6 +4,7 @@ namespace StarDict\Tests;
 
 use InvalidArgumentException;
 use RuntimeException;
+use StarDict\DictData\Sequences\HtmlCodes;
 use StarDict\DictData\Sequences\PhoneticString;
 use StarDict\DictData\Sequences\PngFile;
 use StarDict\DictData\Sequences\PureText;
@@ -32,6 +33,14 @@ class TypeSequenceManagerTest extends TestCase
         $s = $m->getSequences('tm');
         $this->assertEquals('t', $s[0]->getId());
         $this->assertEquals('m', $s[1]->getId());
+    }
+
+    public function testHtmlCodesTypeSequence(): void
+    {
+        $m = new TypeSequenceManager();
+        $m->register(new HtmlCodes());
+        $s = $m->getSequences('h');
+        $this->assertInstanceOf(HtmlCodes::class, $s[0]);
     }
 
     public function testTypeNotFound()
