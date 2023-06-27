@@ -25,7 +25,6 @@ class BinaryIndexHandlerTest extends TestCase
         $data = hex2bin('2dd0b4d0b5d0b2d18fd1820000000000000000aa2dd0b4d0b5d181d18fd18200000000aa000000aa');
         $h = new BinaryIndexHandler($data);
 
-        /** @var DataOffsetItem $offset */
         $gen = $h->getDataOffsets();
         $gen->next();
         /** @var DataOffsetItem $offset */

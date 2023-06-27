@@ -23,7 +23,7 @@ class DictFiles
         string $dict,
         FileFactory $fileFactory
     ): self {
-        $me = new static();
+        $me = new self();
         $me->add($fileFactory->createFileFromFilename($info))
            ->add($fileFactory->createFileFromFilename($index))
            ->add($fileFactory->createFileFromFilename($dict));
@@ -90,7 +90,7 @@ class DictFiles
             $this->info = $file;
         } elseif ($file instanceof IndexFile) {
             $this->index = $file;
-        } elseif (($file instanceof DictFile) || ($file instanceof DZDictFile)) {
+        } elseif ($file instanceof DictFile) {
             $this->dict = $file;
         } else {
             throw new InvalidArgumentException(sprintf('"%s" is not part of StarDict files.', $file->getFilename()));
