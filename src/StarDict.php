@@ -82,8 +82,8 @@ class StarDict
     public function get(string $toc): array
     {
         $this->buildOffsets();
-        $offset = $this->offsets[$toc];
-        return $this->dataReader->fillSequences($offset, $this->typeSequences);
+        $offset = $this->offsets[$toc] ?? -1;
+        return $offset === -1 ? [] : $this->dataReader->fillSequences($offset, $this->typeSequences);
     }
 
     /**

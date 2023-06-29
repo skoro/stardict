@@ -6,5 +6,8 @@ use Generator;
 
 interface IndexDataHandler
 {
+    /**
+     * @return Generator<DataOffsetItem>
+     */
     public function getDataOffsets(): Generator;
 }
