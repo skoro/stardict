@@ -6,7 +6,7 @@ use RuntimeException;
 use StarDict\DictData\DataReader;
 use StarDict\DictData\FileDataReader;
 use StarDict\DictData\FileDZDataReader;
-use StarDict\DictData\Sequences\{HtmlCodes, PhoneticString, PngFile, PureText, TypeSequence, WavFile};
+use StarDict\DictData\Sequences\{HtmlCodes, PhoneticString, PngFile, PureText, TypeSequence, WavFile, Xfdf};
 use StarDict\DictData\TypeSequenceManager;
 use StarDict\Files\Factory;
 use StarDict\Files\File;
@@ -152,6 +152,7 @@ class StarDict
             ->register(new PngFile())
             ->register(new WavFile())
             ->register(new HtmlCodes())
+            ->register(new Xfdf())
             ;
     }
 }
